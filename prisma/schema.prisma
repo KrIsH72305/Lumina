@@ -20,6 +20,11 @@ model User {
   sharedGoals    SharedGoalLink[] @relation("RecipientSharedGoals")
   audits         AuditLog[]       @relation("UserAudits")
   primaryOwnerOf Goal[]           @relation("PrimaryOwnerGoals")
+  oneOnOnesAsEmployee OneOnOne[]  @relation("EmployeeOneOnOnes")
+  oneOnOnesAsManager  OneOnOne[]  @relation("ManagerOneOnOnes")
+  feedbackGiven       Feedback[]  @relation("FeedbackGiven")
+  feedbackReceived    Feedback[]  @relation("FeedbackReceived")
+  growthAreas         GrowthArea[] @relation("EmployeeGrowthAreas")
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 }
@@ -91,4 +96,39 @@ model SharedGoalLink {
   recipientEmployeeId String
   recipientEmployee   User   @relation("RecipientSharedGoals", fields: [recipientEmployeeId], references: [id])
   recipientWeightage  Int
+}
+
+model OneOnOne {
+  id             String   @id @default(cuid())
+  employeeId     String
+  employee       User     @relation("EmployeeOneOnOnes", fields: [employeeId], references: [id])
+  managerId      String
+  manager        User     @relation("ManagerOneOnOnes", fields: [managerId], references: [id])
+  date           DateTime
+  talkingPoints  String?
+  actionItems    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Feedback {
+  id             String   @id @default(cuid())
+  fromUserId     String
+  fromUser       User     @relation("FeedbackGiven", fields: [fromUserId], references: [id])
+  toUserId       String
+  toUser         User     @relation("FeedbackReceived", fields: [toUserId], references: [id])
+  content        String
+  visibility     String   // PUBLIC, PRIVATE_TO_MANAGER
+  createdAt      DateTime @default(now())
+}
+
+model GrowthArea {
+  id             String   @id @default(cuid())
+  employeeId     String
+  employee       User     @relation("EmployeeGrowthAreas", fields: [employeeId], references: [id])
+  title          String
+  description    String?
+  status         String   // NOT_STARTED, IN_PROGRESS, ACHIEVED
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

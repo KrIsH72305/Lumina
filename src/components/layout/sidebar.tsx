@@ -23,18 +23,20 @@ export function Sidebar() {
 
   const navItems = [
     { name: 'Home', href: '/employee', icon: Home },
-    { name: 'My team', href: '#', icon: Users },
-    { name: '1:1s', href: '#', icon: MessageSquare },
-    { name: 'Feedback', href: '#', icon: MessageSquare },
-    { name: 'Updates', href: '#', icon: TrendingUp },
-    { name: 'Grow', href: '#', icon: Award },
+    { name: 'My team', href: '/employee/team', icon: Users },
+    { name: '1:1s', href: '/employee/1-1s', icon: MessageSquare },
+    { name: 'Feedback', href: '/employee/feedback', icon: MessageSquare },
+    { name: 'Updates', href: '/employee/updates', icon: TrendingUp },
+    { name: 'Grow', href: '/employee/grow', icon: Award },
     { name: 'Goals', href: '/employee', icon: Target },
   ]
 
   return (
     <aside className="w-64 flex-shrink-0 bg-[#2c2c38] text-gray-300 flex flex-col h-full border-r border-[#1e1e26]">
       <div className="p-6 flex items-center gap-3 border-b border-[#3f3f4e]">
-        <Image src="/logo.png" alt="Lumina Logo" width={32} height={32} className="object-contain brightness-0 invert" />
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-[0_0_15px_rgba(99,102,241,0.3)] border border-white/10 overflow-hidden">
+          <Image src="/logo.png" alt="Lumina Logo" width={32} height={32} className="object-cover" />
+        </div>
         <span className="font-heading text-xl font-bold tracking-tight text-white">
           Lumina
         </span>
@@ -43,24 +45,8 @@ export function Sidebar() {
       <div className="flex-1 overflow-y-auto py-4">
         <nav className="space-y-1 px-3">
           {navItems.map((item) => {
-            const isActive = item.name === 'Home' || item.name === 'Goals' ? pathname === item.href : false
+            const isActive = pathname === item.href || (item.name === 'Goals' && pathname === '/employee')
             
-            if (item.href === '#') {
-              return (
-                <button
-                  key={item.name}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    import('sonner').then(m => m.toast.info(`${item.name} feature coming soon!`));
-                  }}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-400 hover:bg-[#3f3f4e]/50 hover:text-gray-200`}
-                >
-                  <item.icon className="w-4 h-4" />
-                  {item.name}
-                </button>
-              )
-            }
-
             return (
               <Link
                 key={item.name}
