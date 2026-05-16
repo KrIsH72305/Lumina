@@ -14,7 +14,9 @@ import {
   LogOut,
   Settings,
   AlertCircle,
-  ChevronRight
+  ChevronRight,
+  Activity,
+  Clock
 } from 'lucide-react'
 
 export function Sidebar() {
@@ -34,6 +36,8 @@ export function Sidebar() {
     { name: 'Reviews', href: '/employee/reviews', icon: Award },
     { name: 'PIPs', href: '/employee/pips', icon: AlertCircle },
     { name: 'Growth', href: '/employee/grow', icon: TrendingUp },
+    { name: 'My Team', href: '/employee/team', icon: Users },
+    { name: 'Updates', href: '/employee/updates', icon: Activity },
   ]
 
   if (isManager) {
