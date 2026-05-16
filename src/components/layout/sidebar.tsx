@@ -31,13 +31,13 @@ export function Sidebar() {
   const navItems = [
     { name: 'Home', href: isManager ? '/manager' : '/employee', icon: Home },
     { name: 'Goals', href: '/employee/goals', icon: Target },
+    { name: 'Updates', href: '/employee/updates', icon: Activity },
     { name: '1:1s', href: '/employee/1-1s', icon: MessageSquare },
     { name: 'Feedback', href: '/employee/feedback', icon: MessageSquare },
+    { name: 'My Team', href: '/employee/team', icon: Users },
+    { name: 'Growth', href: '/employee/grow', icon: TrendingUp },
     { name: 'Reviews', href: '/employee/reviews', icon: Award },
     { name: 'PIPs', href: '/employee/pips', icon: AlertCircle },
-    { name: 'Growth', href: '/employee/grow', icon: TrendingUp },
-    { name: 'My Team', href: '/employee/team', icon: Users },
-    { name: 'Updates', href: '/employee/updates', icon: Activity },
   ]
 
   if (isManager) {
