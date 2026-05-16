@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
+import { AdminPushKpi } from '@/components/admin/push-kpi'
+
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions)
 
@@ -20,13 +22,17 @@ export default async function AdminDashboard() {
   const reworkCount = await prisma.goal.count({ where: { status: 'REWORK' } })
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-sm text-gray-500">System overview</p>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Admin Console</h1>
+          <p className="text-slate-500 font-medium italic">Lumina Enterprise Performance Suite</p>
+        </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3 mb-8">
+      <AdminPushKpi />
+
+      <div className="grid gap-6 md:grid-cols-3">
         <Card className="shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">Total Users</CardTitle>

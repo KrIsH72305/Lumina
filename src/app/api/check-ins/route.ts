@@ -14,22 +14,29 @@ function calculateProgressScore(uomType: string, target: number, actual: number)
   let score = 0
   
   if (uomType === 'NUMERIC_MAX') {
+    // Higher is better (Min in Atomberg table)
     if (target === 0) return actual > 0 ? 100 : 0
     score = (actual / target) * 100
   } else if (uomType === 'NUMERIC_MIN') {
-    if (actual === 0) return 100 // Avoid division by zero, min target met perfectly
+    // Lower is better (Max in Atomberg table)
+    if (actual === 0) return 100 // Target met perfectly if actual is 0 (e.g. 0 accidents)
     score = (target / actual) * 100
   } else if (uomType === 'ZERO') {
+    // Zero = Success (e.g. Safety incidents)
     score = actual === 0 ? 100 : 0
   } else if (uomType === 'TIMELINE') {
-    score = actual >= target ? 100 : (actual / target) * 100
+    // Date-based completion
+    // For demo purposes, we treat target as a completion flag (1 = Done on time, 0 = Not)
+    // Or if target is a number of days, actual is days taken.
+    score = actual <= target ? 100 : 0
   } else {
-    // Default fallback
     score = (actual / target) * 100
   }
 
-  // Cap between 0 and 100
-  return Math.min(Math.max(Math.round(score), 0), 100)
+  // Cap at 100% for the "Score" but allow achievement to be recorded as higher
+  // Actually, some systems allow > 100% (extra points). 
+  // Atomberg requirement doesn't specify cap, but usually it's capped at 100% for progress tracking.
+  return Math.max(Math.round(score), 0)
 }
 
 export async function POST(req: Request) {

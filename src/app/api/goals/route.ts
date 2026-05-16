@@ -58,3 +58,52 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ message: 'Internal Server Error' }), { status: 500 })
   }
 }
+
+export async function PATCH(req: Request) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session || session.user.role !== 'EMPLOYEE') {
+      return new Response('Unauthorized', { status: 401 })
+    }
+
+    const goals = await prisma.goal.findMany({
+      where: { employeeId: session.user.id },
+    })
+
+    if (goals.length === 0) {
+      return new Response(JSON.stringify({ message: 'You have no goals to submit' }), { status: 400 })
+    }
+
+    // Validation 1: Total weightage must be exactly 100%
+    const totalWeightage = goals.reduce((sum, g) => sum + g.weightage, 0)
+    if (totalWeightage !== 100) {
+      return new Response(JSON.stringify({ message: `Total weightage must be exactly 100%. Current total: ${totalWeightage}%` }), { status: 400 })
+    }
+
+    // Validation 2: Min weightage per goal (handled at creation, but good to double check)
+    const hasSmallGoal = goals.some(g => g.weightage < 10)
+    if (hasSmallGoal) {
+      return new Response(JSON.stringify({ message: 'All goals must have at least 10% weightage' }), { status: 400 })
+    }
+
+    // Validation 3: Max goals (handled at creation)
+    if (goals.length > 8) {
+      return new Response(JSON.stringify({ message: 'Maximum of 8 goals allowed' }), { status: 400 })
+    }
+
+    // Update all DRAFT or REWORK goals to PENDING_APPROVAL
+    await prisma.goal.updateMany({
+      where: { 
+        employeeId: session.user.id,
+        status: { in: ['DRAFT', 'REWORK'] }
+      },
+      data: { status: 'PENDING_APPROVAL' },
+    })
+
+    return new Response(JSON.stringify({ message: 'Goal sheet submitted for approval' }), { status: 200 })
+  } catch (error) {
+    return new Response(JSON.stringify({ message: 'Internal Server Error' }), { status: 500 })
+  }
+}
+

@@ -45,13 +45,20 @@ const UOM_TYPES = [
   { value: 'ZERO', label: 'Zero (e.g. Safety Incidents)' },
 ]
 
-export function GoalForm({ currentWeightage }: { currentWeightage: number }) {
+export function GoalForm({ currentWeightage, initialData }: { currentWeightage: number, initialData?: any }) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<z.infer<typeof goalSchema>>({
     resolver: zodResolver(goalSchema),
-    defaultValues: {
+    defaultValues: initialData ? {
+      title: initialData.title,
+      description: initialData.description || '',
+      thrustArea: initialData.thrustArea,
+      uomType: initialData.uomType,
+      target: initialData.target,
+      weightage: initialData.weightage,
+    } : {
       title: '',
       description: '',
       thrustArea: '',
@@ -73,19 +80,22 @@ export function GoalForm({ currentWeightage }: { currentWeightage: number }) {
     setIsLoading(true)
 
     try {
-      const res = await fetch('/api/goals', {
-        method: 'POST',
+      const url = initialData ? `/api/goals?id=${initialData.id}` : '/api/goals'
+      const method = initialData ? 'PATCH' : 'POST'
+      
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
       })
 
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.message || 'Failed to create goal')
+        throw new Error(data.message || 'Failed to save goal')
       }
 
-      toast.success('Goal created successfully')
-      router.push('/employee')
+      toast.success(initialData ? 'Goal updated successfully' : 'Goal created successfully')
+      router.push('/employee/goals')
       router.refresh()
     } catch (error: any) {
       toast.error(error.message)
@@ -93,6 +103,8 @@ export function GoalForm({ currentWeightage }: { currentWeightage: number }) {
       setIsLoading(false)
     }
   }
+
+  const isShared = initialData?.isShared
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -108,7 +120,7 @@ export function GoalForm({ currentWeightage }: { currentWeightage: number }) {
                     <FormItem>
                       <FormLabel>Goal Title</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. Increase Q2 Sales by 20%" {...field} />
+                        <Input placeholder="e.g. Increase Q2 Sales by 20%" {...field} disabled={isShared} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -122,7 +134,7 @@ export function GoalForm({ currentWeightage }: { currentWeightage: number }) {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Thrust Area</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isShared}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select an area" />
@@ -147,7 +159,7 @@ export function GoalForm({ currentWeightage }: { currentWeightage: number }) {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Measurement Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isShared}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select type" />
@@ -175,7 +187,7 @@ export function GoalForm({ currentWeightage }: { currentWeightage: number }) {
                       <FormItem>
                         <FormLabel>Target Value</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} />
+                          <Input type="number" step="0.01" {...field} disabled={isShared} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

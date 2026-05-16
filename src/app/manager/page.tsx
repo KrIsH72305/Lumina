@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import {
   Table,
   TableBody,
@@ -48,12 +49,15 @@ export default async function ManagerDashboard() {
                 <TableHead>Email</TableHead>
                 <TableHead>Goals Drafted</TableHead>
                 <TableHead>Total Weightage</TableHead>
+                <TableHead>Sheet Status</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {team.map((member) => {
                 const totalWeightage = member.goals.reduce((sum, g) => sum + g.weightage, 0)
+                const hasPending = member.goals.some(g => g.status === 'PENDING_APPROVAL')
+                const allApproved = member.goals.length > 0 && member.goals.every(g => g.status === 'APPROVED')
                 
                 return (
                   <TableRow key={member.id}>
@@ -64,8 +68,19 @@ export default async function ManagerDashboard() {
                       {totalWeightage}%
                     </TableCell>
                     <TableCell>
+                      {hasPending ? (
+                        <Badge className="bg-blue-50 text-blue-700 border-blue-100 italic animate-pulse">Pending Review</Badge>
+                      ) : allApproved ? (
+                        <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100">Approved</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-slate-400">Drafting</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
                       <Link href={`/manager/employee/${member.id}`}>
-                        <Button variant="outline" size="sm">Review Goals</Button>
+                        <Button variant={hasPending ? 'default' : 'outline'} size="sm" className={hasPending ? 'bg-indigo-600' : ''}>
+                          {hasPending ? 'Review Now' : 'Review Goals'}
+                        </Button>
                       </Link>
                     </TableCell>
                   </TableRow>

@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Target, Plus, Filter, ArrowUpRight, CheckCircle2, Clock, AlertCircle } from 'lucide-react'
 
+import { GoalActions } from '@/components/employee/goal-actions'
+
 export default async function GoalsPage() {
   const session = await getServerSession(authOptions)
 
@@ -22,14 +24,18 @@ export default async function GoalsPage() {
     orderBy: { createdAt: 'desc' },
   })
 
+  const totalWeightage = goals.reduce((sum, g) => sum + g.weightage, 0)
+  const hasDrafts = goals.some(g => ['DRAFT', 'REWORK'].includes(g.status))
   const approvedCount = goals.filter(g => g.status === 'APPROVED').length
-  const draftCount = goals.filter(g => g.status === 'DRAFT').length
+  const draftCount = goals.filter(g => g.status === 'DRAFT' || g.status === 'PENDING_APPROVAL').length
   const reworkCount = goals.filter(g => g.status === 'REWORK').length
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'APPROVED':
-        return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100">On Track</Badge>
+        return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100">Approved / On Track</Badge>
+      case 'PENDING_APPROVAL':
+        return <Badge className="bg-blue-50 text-blue-700 border-blue-100 italic font-medium animate-pulse">Pending Review</Badge>
       case 'DRAFT':
         return <Badge className="bg-amber-50 text-amber-700 border-amber-100">Drafting</Badge>
       case 'REWORK':
@@ -42,18 +48,20 @@ export default async function GoalsPage() {
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      {/* Header Banner */}
       <div className="bg-gradient-to-r from-emerald-600 to-teal-500 -mx-8 -mt-8 px-10 py-12 flex items-center justify-between shadow-lg shadow-emerald-100 mb-10 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="flex flex-col gap-2 relative z-10">
           <h1 className="text-4xl font-black text-white tracking-tight">My Goals & OKRs</h1>
           <p className="text-emerald-50 text-lg font-medium opacity-90">Track your individual performance and growth targets.</p>
         </div>
-        <Link href="/employee/create" className="relative z-10">
-          <Button className="bg-white text-emerald-600 hover:bg-emerald-50 shadow-xl font-black px-8 h-12">
-            <Plus className="w-4 h-4 mr-2" /> Create New Goal
-          </Button>
-        </Link>
+        <div className="flex items-center gap-4 relative z-10">
+          <GoalActions totalWeightage={totalWeightage} hasDrafts={hasDrafts} />
+          <Link href="/employee/create">
+            <Button className="bg-white text-emerald-600 hover:bg-emerald-50 shadow-xl font-black px-8 h-12">
+              <Plus className="w-4 h-4 mr-2" /> Create New Goal
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Stats Summary */}
@@ -134,6 +142,13 @@ export default async function GoalsPage() {
                     </div>
 
                     <div className="flex items-center gap-4 shrink-0">
+                      {(goal.status === 'DRAFT' || goal.status === 'REWORK') && (
+                        <Link href={`/employee/edit/${goal.id}`}>
+                          <Button variant="outline" size="sm" className="h-8 border-slate-200 text-slate-600 font-bold">
+                            Edit
+                          </Button>
+                        </Link>
+                      )}
                       <div className="flex flex-col items-end gap-1">
                         <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Progress</span>
                         <div className="w-32 h-2 bg-slate-100 rounded-full overflow-hidden">
