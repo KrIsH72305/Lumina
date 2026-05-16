@@ -24,6 +24,7 @@ export function Sidebar() {
   if (!session) return null
 
   const isManager = session.user.role === 'MANAGER' || session.user.role === 'ADMIN'
+  const isAdmin = session.user.role === 'ADMIN'
   
   const navItems = [
     { name: 'Home', href: isManager ? '/manager' : '/employee', icon: Home },
@@ -32,9 +33,16 @@ export function Sidebar() {
     { name: 'Feedback', href: '/employee/feedback', icon: MessageSquare },
     { name: 'Reviews', href: '/employee/reviews', icon: Award },
     { name: 'PIPs', href: '/employee/pips', icon: AlertCircle },
+    { name: 'Growth', href: '/employee/grow', icon: TrendingUp },
   ]
 
   if (isManager) {
+    navItems.push({ name: 'Talent Grid', href: '/employee/talent', icon: Users })
+  }
+
+  if (isAdmin) {
+    navItems.push({ name: 'Admin Panel', href: '/admin', icon: Target })
+    navItems.push({ name: 'Reports', href: '/admin/reports', icon: Award })
     navItems.push({ name: 'System Logs', href: '/admin/logs', icon: Settings })
   }
 
