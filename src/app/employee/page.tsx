@@ -7,6 +7,7 @@ import { getActiveCycle } from '@/lib/cycles'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { GoalDistributionChart, WeightageBarChart } from '@/components/dashboard/stats-charts'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { 
@@ -72,6 +73,19 @@ export default async function EmployeeDashboard() {
     const latest = g.checkIns[0];
     return latest && latest.goalStatus === 'ON_TRACK';
   }).length;
+
+  // Prepare chart data
+  const goalStatusData = [
+    { name: 'Approved', value: goals.filter(g => g.status === 'APPROVED').length },
+    { name: 'Pending', value: goals.filter(g => g.status === 'PENDING_APPROVAL').length },
+    { name: 'Draft', value: goals.filter(g => g.status === 'DRAFT').length },
+    { name: 'Rework', value: goals.filter(g => g.status === 'REWORK').length },
+  ].filter(d => d.value > 0);
+
+  const weightageData = goals.map(g => ({
+    name: g.title.length > 12 ? g.title.substring(0, 10) + '...' : g.title,
+    weight: g.weightage
+  }));
 
   return (
     <div className="flex flex-col min-h-full bg-slate-50/50">
@@ -211,6 +225,34 @@ export default async function EmployeeDashboard() {
                       <TrendingUp className="w-6 h-6 text-indigo-600" />
                     </div>
                  </Card>
+              </div>
+            </section>
+
+            {/* Insights & Analytics */}
+            <section className="space-y-6">
+              <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
+                <TrendingUp className="w-7 h-7 text-indigo-500" />
+                Insights & Analytics
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <Card className="bg-white border-slate-200 shadow-sm overflow-hidden">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg font-bold">Goal Distribution</CardTitle>
+                    <CardDescription className="text-xs font-medium">By current status</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <GoalDistributionChart goalStatusData={goalStatusData} />
+                  </CardContent>
+                </Card>
+                <Card className="bg-white border-slate-200 shadow-sm overflow-hidden">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg font-bold">Weightage Allocation</CardTitle>
+                    <CardDescription className="text-xs font-medium">Impact per goal</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <WeightageBarChart weightageData={weightageData} />
+                  </CardContent>
+                </Card>
               </div>
             </section>
           </div>
