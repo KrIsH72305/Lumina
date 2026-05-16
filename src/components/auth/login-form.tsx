@@ -76,11 +76,11 @@ export function LoginForm() {
       <CardContent className="p-10 space-y-8">
         {/* Branding */}
         <div className="space-y-2">
-          <div className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center overflow-hidden p-1">
-               <Image src="/logo.png" alt="Lumina" width={32} height={32} className="object-contain" />
+          <div className="flex items-center gap-4">
+             <div className="w-14 h-14 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center overflow-hidden p-1.5">
+               <Image src="/logo.png" alt="Lumina" width={48} height={48} className="object-contain" />
              </div>
-             <h1 className="text-3xl font-heading font-bold text-slate-900 tracking-tight">Lumina</h1>
+             <h1 className="text-4xl font-heading font-black text-slate-900 tracking-tight">Lumina</h1>
           </div>
           <p className="text-slate-500 font-medium text-sm">
             Enter your email and password to access your dashboard.
