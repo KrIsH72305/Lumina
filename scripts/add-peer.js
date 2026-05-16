@@ -3,21 +3,21 @@ const prisma = new PrismaClient()
 
 async function main() {
   const manager = await prisma.user.findUnique({
-    where: { email: 'manager@goalflow.com' }
+    where: { email: 'manager@lumina.com' }
   })
   if (manager) {
     await prisma.user.upsert({
-      where: { email: 'peer@goalflow.com' },
+      where: { email: 'peer@lumina.com' },
       update: {},
       create: {
-        email: 'peer@goalflow.com',
+        email: 'peer@lumina.com',
         name: 'Jordan Rivera',
         passwordHash: 'dummy',
         role: 'EMPLOYEE',
         managerId: manager.id
       }
     })
-    console.log('Peer added for goalflow')
+    console.log('Peer added for lumina')
   }
 }
 
