@@ -134,7 +134,7 @@ export function GoalForm({ currentWeightage, initialData }: { currentWeightage: 
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Thrust Area</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isShared}>
+                        <Select onValueChange={field.onChange} value={field.value || ""} disabled={isShared}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select an area" />
@@ -159,7 +159,7 @@ export function GoalForm({ currentWeightage, initialData }: { currentWeightage: 
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Measurement Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isShared}>
+                        <Select onValueChange={field.onChange} value={field.value || ""} disabled={isShared}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select type" />
