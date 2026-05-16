@@ -36,7 +36,10 @@ export default async function EmployeeDashboard() {
 
   // Fetch data for summary
   const [goals, oneOnOnes, feedback, pips, pendingReviews, activeCycle] = await Promise.all([
-    prisma.goal.findMany({ where: { employeeId: session.user.id } }),
+    prisma.goal.findMany({ 
+      where: { employeeId: session.user.id },
+      include: { checkIns: true }
+    }),
     prisma.oneOnOne.findMany({ where: { employeeId: session.user.id }, take: 3, orderBy: { date: 'desc' } }),
     prisma.feedback.findMany({ where: { toUserId: session.user.id }, take: 3, orderBy: { createdAt: 'desc' } }),
     prisma.pip.findMany({ where: { userId: session.user.id, status: 'ACTIVE' } }),
@@ -48,7 +51,27 @@ export default async function EmployeeDashboard() {
     getActiveCycle()
   ])
 
+  // Calculate real performance metrics
+  let totalWeightedAchievement = 0;
+  goals.forEach(goal => {
+    // Get the most recent check-in for this goal
+    const latestCheckIn = goal.checkIns.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )[0];
+    
+    if (latestCheckIn && goal.target > 0) {
+      const achievementRatio = Math.min(latestCheckIn.actualAchievement / goal.target, 1.2); // Cap at 120% for overachievement
+      totalWeightedAchievement += (achievementRatio * goal.weightage);
+    }
+  });
+
+  const weightageScore = (totalWeightedAchievement / 10).toFixed(1);
+  const overallProgress = Math.round(totalWeightedAchievement);
   const approvedCount = goals.filter(g => g.status === 'APPROVED').length
+  const onTrackCount = goals.filter(g => {
+    const latest = g.checkIns[0];
+    return latest && latest.goalStatus === 'ON_TRACK';
+  }).length;
 
   return (
     <div className="flex flex-col min-h-full bg-slate-50/50">
@@ -169,20 +192,20 @@ export default async function EmployeeDashboard() {
                    <div className="flex flex-col gap-4">
                      <div className="flex items-center justify-between">
                         <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Progress to Date</span>
-                        <span className="text-2xl font-black text-emerald-600">68%</span>
+                        <span className="text-2xl font-black text-emerald-600">{overallProgress}%</span>
                      </div>
                      <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden">
-                       <div className="h-full bg-emerald-500 rounded-full shadow-lg shadow-emerald-200" style={{ width: '68%' }} />
+                       <div className="h-full bg-emerald-500 rounded-full shadow-lg shadow-emerald-200" style={{ width: `${overallProgress}%` }} />
                      </div>
                      <p className="text-xs font-medium text-slate-500 text-center">
-                       You are <span className="text-emerald-600 font-bold">ahead of schedule</span> for 3 out of 5 goals.
+                       You are <span className="text-emerald-600 font-bold">{overallProgress > 50 ? 'on track' : 'starting'}</span> for {onTrackCount} out of {goals.length} goals.
                      </p>
                    </div>
                  </Card>
                  <Card className="bg-white border-slate-200 shadow-sm p-6 flex items-center justify-between">
                     <div className="flex flex-col gap-1">
                       <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Weightage Score</span>
-                      <span className="text-3xl font-black text-slate-900">8.4 / 10</span>
+                      <span className="text-3xl font-black text-slate-900">{weightageScore} / 10</span>
                     </div>
                     <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center">
                       <TrendingUp className="w-6 h-6 text-indigo-600" />
