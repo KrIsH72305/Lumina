@@ -54,8 +54,8 @@ export function Sidebar() {
     <aside className="w-64 flex-shrink-0 bg-white border-r border-slate-200 flex flex-col h-full shadow-sm">
       {/* Logo Section */}
       <div className="p-6 flex items-center gap-3 border-b border-slate-50">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200 border border-white/20 overflow-hidden">
-          <Image src="/logo.png" alt="Lumina Logo" width={32} height={32} className="object-cover" />
+        <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-sm border border-slate-100 overflow-hidden">
+          <Image src="/logo.png" alt="Lumina Logo" width={48} height={48} className="object-contain" />
         </div>
         <span className="font-heading text-xl font-black tracking-tight text-slate-900">
           Lumina
