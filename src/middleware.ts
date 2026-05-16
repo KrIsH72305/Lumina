@@ -20,6 +20,10 @@ export default withAuth(
     }
 
     if (path.startsWith('/admin') && token?.role !== 'ADMIN') {
+      // Exception: allow Managers to view logs for audit proof
+      if (path === '/admin/logs' && token?.role === 'MANAGER') {
+        return NextResponse.next()
+      }
       return NextResponse.redirect(new URL('/', req.url))
     }
     

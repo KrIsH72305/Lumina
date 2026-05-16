@@ -2,9 +2,24 @@ import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import AzureADProvider from 'next-auth/providers/azure-ad'
 
 export const authOptions: NextAuthOptions = {
   providers: [
+    AzureADProvider({
+      clientId: process.env.AZURE_AD_CLIENT_ID!,
+      clientSecret: process.env.AZURE_AD_CLIENT_SECRET!,
+      tenantId: process.env.AZURE_AD_TENANT_ID!,
+      // Custom mapping for roles if needed
+      async profile(profile) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          role: profile.roles?.[0] || 'EMPLOYEE', // Mapped from Entra App Roles
+        }
+      }
+    }),
     CredentialsProvider({
       name: 'Credentials',
       credentials: {

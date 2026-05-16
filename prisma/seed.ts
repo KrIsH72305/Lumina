@@ -90,6 +90,55 @@ async function main() {
     }
   })
 
+  // 6. Create Atomberg Quarterly Windows
+  const year = new Date().getFullYear()
+  
+  const cycles = [
+    {
+      name: `Goal Setting ${year}`,
+      phase: 'GOAL_SETTING',
+      windowOpen: new Date(`${year}-05-01`),
+      windowClose: new Date(`${year}-06-30`),
+      isActive: true,
+    },
+    {
+      name: `Q1 Check-in ${year}`,
+      phase: 'CHECK_IN_Q1',
+      windowOpen: new Date(`${year}-07-01`),
+      windowClose: new Date(`${year}-08-31`),
+      isActive: true,
+    },
+    {
+      name: `Q2 Check-in ${year}`,
+      phase: 'CHECK_IN_Q2',
+      windowOpen: new Date(`${year}-10-01`),
+      windowClose: new Date(`${year}-11-30`),
+      isActive: true,
+    },
+    {
+      name: `Q3 Check-in ${year+1}`,
+      phase: 'CHECK_IN_Q3',
+      windowOpen: new Date(`${year+1}-01-01`),
+      windowClose: new Date(`${year+1}-02-28`),
+      isActive: true,
+    },
+    {
+      name: `Q4 Annual ${year+1}`,
+      phase: 'CHECK_IN_Q4',
+      windowOpen: new Date(`${year+1}-03-01`),
+      windowClose: new Date(`${year+1}-04-30`),
+      isActive: true,
+    },
+  ]
+
+  for (const c of cycles) {
+    await prisma.cycle.upsert({
+      where: { id: `cycle-${c.phase}-${year}` },
+      update: c,
+      create: { id: `cycle-${c.phase}-${year}`, ...c },
+    })
+  }
+
   console.log('Seed data created successfully')
 }
 

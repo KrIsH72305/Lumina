@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { isWindowOpen } from '@/lib/cycles'
 
 const goalSchema = z.object({
   title: z.string().min(5),
@@ -18,6 +19,12 @@ export async function POST(req: Request) {
 
     if (!session || session.user.role !== 'EMPLOYEE') {
       return new Response('Unauthorized', { status: 401 })
+    }
+
+    // Check if Goal Setting window is open
+    const canEdit = await isWindowOpen('GOAL_SETTING')
+    if (!canEdit) {
+      return new Response(JSON.stringify({ message: 'Goal setting window is currently closed.' }), { status: 403 })
     }
 
     const json = await req.json()
@@ -100,6 +107,17 @@ export async function PATCH(req: Request) {
       },
       data: { status: 'PENDING_APPROVAL' },
     })
+
+    // Fetch manager details to notify
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { manager: true }
+    })
+
+    if (user?.manager) {
+      const { notifyManagerOfSubmission } = await import('@/lib/notifications')
+      await notifyManagerOfSubmission(user.name, user.manager.email, user.manager.name, user.id)
+    }
 
     return new Response(JSON.stringify({ message: 'Goal sheet submitted for approval' }), { status: 200 })
   } catch (error) {

@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { getActiveCycle } from '@/lib/cycles'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -34,7 +35,7 @@ export default async function EmployeeDashboard() {
   }
 
   // Fetch data for summary
-  const [goals, oneOnOnes, feedback, pips, pendingReviews] = await Promise.all([
+  const [goals, oneOnOnes, feedback, pips, pendingReviews, activeCycle] = await Promise.all([
     prisma.goal.findMany({ where: { employeeId: session.user.id } }),
     prisma.oneOnOne.findMany({ where: { employeeId: session.user.id }, take: 3, orderBy: { date: 'desc' } }),
     prisma.feedback.findMany({ where: { toUserId: session.user.id }, take: 3, orderBy: { createdAt: 'desc' } }),
@@ -43,7 +44,8 @@ export default async function EmployeeDashboard() {
       where: { reviewerId: session.user.id, status: 'PENDING' },
       include: { cycle: true },
       take: 2
-    })
+    }),
+    getActiveCycle()
   ])
 
   const approvedCount = goals.filter(g => g.status === 'APPROVED').length
@@ -58,10 +60,17 @@ export default async function EmployeeDashboard() {
             {session.user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
           </div>
           <div className="space-y-2">
-            <h1 className="text-5xl font-black text-white tracking-tight">
-              Good morning, {session.user.name.split(' ')[0]}!
-            </h1>
-            <p className="text-indigo-100 text-lg font-medium opacity-90">You have 3 tasks requiring your attention today.</p>
+            <div className="flex items-center gap-3">
+              <h1 className="text-4xl font-black text-white tracking-tight">Welcome, {session.user.name.split(' ')[0]}</h1>
+              {activeCycle && (
+                <Link href={activeCycle.phase === 'GOAL_SETTING' ? '/employee/goals' : '/employee/check-ins'}>
+                  <Badge className="bg-white/20 hover:bg-white/30 text-white border-white/20 backdrop-blur-md px-3 py-1 text-xs font-bold uppercase tracking-wider cursor-pointer transition-all hover:scale-105 active:scale-95 shadow-lg shadow-white/5">
+                    {activeCycle.name} Window Open
+                  </Badge>
+                </Link>
+              )}
+            </div>
+            <p className="text-indigo-100 text-lg font-medium opacity-90">You're doing great! Here's your performance snapshot.</p>
           </div>
         </div>
         <div className="flex items-center gap-4 relative z-10">
@@ -133,8 +142,8 @@ export default async function EmployeeDashboard() {
                        <h3 className="text-lg font-bold text-slate-900">Update your goals</h3>
                        <p className="text-sm text-slate-500 font-medium">Check in on your {goals.length} active targets</p>
                      </div>
-                     <Link href="/employee/goals">
-                       <Button variant="outline" className="border-slate-200 text-slate-600 font-bold px-6">Update</Button>
+                     <Link href={activeCycle?.phase.startsWith('CHECK_IN') ? '/employee/check-ins' : '/employee/goals'}>
+                       <Button variant="outline" className="border-slate-200 text-slate-600 font-bold px-6 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-600 transition-all">Update</Button>
                      </Link>
                    </div>
                 </Card>
@@ -202,7 +211,7 @@ export default async function EmployeeDashboard() {
                              <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs shadow-inner">SC</div>
                              <div className="flex flex-col">
                                <span className="text-sm font-bold text-slate-900">Sarah Chen</span>
-                               <span className="text-[11px] font-medium text-slate-400">{new Date(meeting.date).toLocaleDateString()}</span>
+                               <span className="text-[11px] font-bold text-slate-400">{new Date(meeting.date).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                              </div>
                           </div>
                           <ArrowUpRight className="w-4 h-4 text-slate-300" />

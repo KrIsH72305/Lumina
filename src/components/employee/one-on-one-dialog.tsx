@@ -23,19 +23,24 @@ export function OneOnOneDialog() {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [date, setDate] = useState('')
+  const [time, setTime] = useState('')
   const [talkingPoints, setTalkingPoints] = useState('')
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!date) return toast.error('Please select a date')
+    if (!time) return toast.error('Please select a time')
 
     setIsLoading(true)
 
     try {
+      // Combine date and time
+      const dateTime = `${date}T${time}`
+      
       const res = await fetch('/api/1-1s', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date, talkingPoints }),
+        body: JSON.stringify({ date: dateTime, talkingPoints }),
       })
 
       if (!res.ok) {
@@ -46,6 +51,7 @@ export function OneOnOneDialog() {
       toast.success('1:1 Scheduled!')
       setOpen(false)
       setDate('')
+      setTime('')
       setTalkingPoints('')
       router.refresh()
     } catch (error: any) {
@@ -72,15 +78,27 @@ export function OneOnOneDialog() {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4 pt-4">
-          <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="time">Time</Label>
+              <Input
+                id="time"
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                required
+              />
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="talkingPoints">Talking Points</Label>

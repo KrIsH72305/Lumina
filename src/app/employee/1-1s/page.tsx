@@ -64,8 +64,8 @@ export default async function OneOnOnesPage() {
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="font-bold text-gray-900">Sync with {currentUser?.manager?.name}</h3>
-                        <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
-                          <Calendar className="w-3 h-3" /> {new Date(meeting.date).toLocaleDateString()}
+                        <p className="text-sm text-gray-500 flex items-center gap-1 mt-1 font-medium">
+                          <Calendar className="w-3 h-3" /> {new Date(meeting.date).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
                         </p>
                       </div>
                       <Button variant="outline" size="sm">View Notes</Button>

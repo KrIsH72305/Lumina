@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { isWindowOpen } from '@/lib/cycles'
 
 const checkInSchema = z.object({
   goalId: z.string(),
@@ -49,6 +50,20 @@ export async function POST(req: Request) {
 
     const json = await req.json()
     const { goalId, quarter, actualAchievement, goalStatus } = checkInSchema.parse(json)
+
+    // Check if check-in window is open for this quarter
+    const phaseMap: Record<string, any> = {
+      'Q1': 'CHECK_IN_Q1',
+      'Q2': 'CHECK_IN_Q2',
+      'Q3': 'CHECK_IN_Q3',
+      'Q4': 'CHECK_IN_Q4',
+    }
+    const phase = phaseMap[quarter]
+    const canCheckIn = await isWindowOpen(phase)
+    
+    if (!canCheckIn) {
+      return new Response(JSON.stringify({ message: `${quarter} check-in window is currently closed.` }), { status: 403 })
+    }
 
     const goal = await prisma.goal.findUnique({
       where: { id: goalId, employeeId: session.user.id }

@@ -23,18 +23,20 @@ export function Sidebar() {
 
   if (!session) return null
 
+  const isManager = session.user.role === 'MANAGER' || session.user.role === 'ADMIN'
+  
   const navItems = [
-    { name: 'Home', href: '/employee', icon: Home },
-    { name: 'My team', href: '/employee/team', icon: Users },
+    { name: 'Home', href: isManager ? '/manager' : '/employee', icon: Home },
+    { name: 'Goals', href: '/employee/goals', icon: Target },
     { name: '1:1s', href: '/employee/1-1s', icon: MessageSquare },
     { name: 'Feedback', href: '/employee/feedback', icon: MessageSquare },
-    { name: 'Updates', href: '/employee/updates', icon: TrendingUp },
     { name: 'Reviews', href: '/employee/reviews', icon: Award },
-    { name: 'Talent', href: '/employee/talent', icon: Users },
     { name: 'PIPs', href: '/employee/pips', icon: AlertCircle },
-    { name: 'Grow', href: '/employee/grow', icon: Award },
-    { name: 'Goals', href: '/employee/goals', icon: Target },
   ]
+
+  if (isManager) {
+    navItems.push({ name: 'System Logs', href: '/admin/logs', icon: Settings })
+  }
 
   return (
     <aside className="w-64 flex-shrink-0 bg-white border-r border-slate-200 flex flex-col h-full shadow-sm">

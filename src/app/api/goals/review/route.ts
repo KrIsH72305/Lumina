@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { isWindowOpen } from '@/lib/cycles'
 
 const reviewSchema = z.object({
   employeeId: z.string(),
@@ -20,6 +21,12 @@ export async function POST(req: Request) {
 
     if (!session || (session.user.role !== 'MANAGER' && session.user.role !== 'ADMIN')) {
       return new Response('Unauthorized', { status: 401 })
+    }
+
+    // Check if Goal Setting window is open for Approval action
+    const canReview = await isWindowOpen('GOAL_SETTING')
+    if (!canReview) {
+      return new Response(JSON.stringify({ message: 'The Goal Approval window is currently closed.' }), { status: 403 })
     }
 
     const json = await req.json()
@@ -68,7 +75,19 @@ export async function POST(req: Request) {
       }
     }
 
-    return new Response(JSON.stringify({ success: true }), { status: 200 })
+    // 4. Notify Employee
+    const employee = await prisma.user.findUnique({ where: { id: employeeId } })
+    if (employee) {
+      const { notifyEmployeeOfApproval } = await import('@/lib/notifications')
+      await notifyEmployeeOfApproval(
+        employee.email, 
+        employee.name, 
+        action === 'APPROVE' ? 'APPROVED' : 'REJECTED',
+        reworkComment
+      )
+    }
+
+    return new Response(JSON.stringify({ message: `Goals ${action === 'APPROVE' ? 'approved' : 'marked for rework'}` }), { status: 200 })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(JSON.stringify({ message: error.issues[0].message }), { status: 422 })
