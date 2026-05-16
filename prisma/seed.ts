@@ -6,57 +6,91 @@ const prisma = new PrismaClient()
 async function main() {
   const passwordHash = await bcrypt.hash('Demo@1234', 10)
 
-  // 1. Create Admin
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@lumina.com' },
-    update: {},
-    create: {
-      email: 'admin@lumina.com',
-      name: 'Admin User',
-      passwordHash,
-      role: 'ADMIN',
-    },
-  })
-
-  // 2. Create Manager
+  // 1. Create Users
   const manager = await prisma.user.upsert({
     where: { email: 'manager@lumina.com' },
     update: {},
     create: {
       email: 'manager@lumina.com',
-      name: 'Manager User',
+      name: 'Sarah Chen',
       passwordHash,
       role: 'MANAGER',
     },
   })
 
-  // 3. Create Employee
   const employee = await prisma.user.upsert({
     where: { email: 'employee@lumina.com' },
     update: {},
     create: {
       email: 'employee@lumina.com',
-      name: 'Employee User',
+      name: 'Alex Rivera',
       passwordHash,
       role: 'EMPLOYEE',
       managerId: manager.id,
     },
   })
 
-  // 4. Create Active Cycle
-  const cycle = await prisma.cycle.upsert({
-    where: { id: 'default-cycle' }, // Or let it auto-generate, but we need upsert
+  // 2. Create Review Cycle
+  const reviewCycle = await prisma.reviewCycle.create({
+    data: {
+      name: '2024 Mid-Year Review',
+      status: 'ACTIVE',
+      startDate: new Date('2024-06-01'),
+      endDate: new Date('2024-06-30'),
+    }
+  })
+
+  // 3. Create Sample Reviews
+  await prisma.review.create({
+    data: {
+      cycleId: reviewCycle.id,
+      revieweeId: employee.id,
+      reviewerId: employee.id,
+      type: 'SELF',
+      content: JSON.stringify({
+        strengths: "Great progress on the Lumina project.",
+        improvements: "Need to focus more on documentation."
+      }),
+      status: 'SUBMITTED',
+      score: 4.5
+    }
+  })
+
+  // 4. Create Talent Rating (9-Box)
+  await prisma.talentRating.create({
+    data: {
+      userId: employee.id,
+      performance: 3, // High
+      potential: 2,   // Medium
+      managerComment: "Alex is a high performer with potential for leadership roles."
+    }
+  })
+
+  // 5. Create a PIP for another user (let's create a new one)
+  const pipUser = await prisma.user.upsert({
+    where: { email: 'pip@lumina.com' },
     update: {},
     create: {
-      name: 'Phase 1 Goal Setting 2026',
-      phase: 'GOAL_SETTING',
-      windowOpen: new Date('2026-05-01T00:00:00Z'),
-      windowClose: new Date('2026-05-31T23:59:59Z'),
-      isActive: true,
+      email: 'pip@lumina.com',
+      name: 'Jordan Smith',
+      passwordHash,
+      role: 'EMPLOYEE',
+      managerId: manager.id,
     },
   })
 
-  console.log({ admin, manager, employee, cycle })
+  await prisma.pip.create({
+    data: {
+      userId: pipUser.id,
+      title: 'Communication Improvement Plan',
+      description: 'Focus on timely updates and stakeholder communication.',
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      status: 'ACTIVE'
+    }
+  })
+
+  console.log('Seed data created successfully')
 }
 
 main()

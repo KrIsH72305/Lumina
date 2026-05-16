@@ -1,9 +1,25 @@
+export const dynamic = 'force-dynamic'
+
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { 
+  ClipboardList, 
+  MessageSquare, 
+  Target, 
+  TrendingUp, 
+  Calendar, 
+  ChevronRight, 
+  Star, 
+  ArrowUpRight,
+  Plus,
+  Users
+} from 'lucide-react'
 
 export default async function EmployeeDashboard() {
   const session = await getServerSession(authOptions)
@@ -12,210 +28,239 @@ export default async function EmployeeDashboard() {
     redirect('/')
   }
 
-  const goals = await prisma.goal.findMany({
-    where: { employeeId: session.user.id },
-    orderBy: { createdAt: 'desc' },
-  })
-
-  const approvedCount = goals.filter(g => g.status === 'APPROVED').length
-  const draftCount = goals.filter(g => g.status === 'DRAFT').length
-  const reworkCount = goals.filter(g => g.status === 'REWORK').length
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'APPROVED':
-        return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-100 text-emerald-800">On track</span>
-      case 'DRAFT':
-        return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-800">Progressing</span>
-      case 'REWORK':
-        return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-rose-100 text-rose-800">Off track</span>
-      default:
-        return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-800">{status}</span>
-    }
+  const userExists = await prisma.user.findUnique({ where: { id: session.user.id } })
+  if (!userExists) {
+    redirect('/login')
   }
 
+  // Fetch data for summary
+  const [goals, oneOnOnes, feedback, pips, pendingReviews] = await Promise.all([
+    prisma.goal.findMany({ where: { employeeId: session.user.id } }),
+    prisma.oneOnOne.findMany({ where: { employeeId: session.user.id }, take: 3, orderBy: { date: 'desc' } }),
+    prisma.feedback.findMany({ where: { toUserId: session.user.id }, take: 3, orderBy: { createdAt: 'desc' } }),
+    prisma.pip.findMany({ where: { userId: session.user.id, status: 'ACTIVE' } }),
+    prisma.review.findMany({ 
+      where: { reviewerId: session.user.id, status: 'PENDING' },
+      include: { cycle: true },
+      take: 2
+    })
+  ])
+
+  const approvedCount = goals.filter(g => g.status === 'APPROVED').length
+
   return (
-    <div className="flex flex-col min-h-full">
-      {/* Welcome Banner (Purple Gradient) */}
-      <div className="bg-gradient-to-r from-fuchsia-500 to-purple-400 px-8 py-10 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-fuchsia-400 border-2 border-white text-white flex items-center justify-center text-xl font-bold shadow-sm">
+    <div className="flex flex-col min-h-full bg-slate-50/50">
+      {/* Welcome Banner */}
+      <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 px-10 py-16 flex items-center justify-between shadow-xl shadow-indigo-100 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+        <div className="flex items-center gap-8 relative z-10">
+          <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-xl border-2 border-white/30 text-white flex items-center justify-center text-3xl font-black shadow-2xl">
             {session.user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">
-            Welcome, {session.user.name.split(' ')[0]}!
-          </h1>
+          <div className="space-y-2">
+            <h1 className="text-5xl font-black text-white tracking-tight">
+              Good morning, {session.user.name.split(' ')[0]}!
+            </h1>
+            <p className="text-indigo-100 text-lg font-medium opacity-90">You have 3 tasks requiring your attention today.</p>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="secondary" className="bg-white text-gray-800 hover:bg-gray-50 border-0 font-medium">
-            Give or request feedback
-          </Button>
-          <Button variant="secondary" className="bg-white text-gray-800 hover:bg-gray-50 border-0 font-medium">
-            More actions ▾
-          </Button>
+        <div className="flex items-center gap-4 relative z-10">
+          <Link href="/employee/feedback">
+            <Button variant="secondary" className="bg-white/10 backdrop-blur-md text-white hover:bg-white/20 border-white/20 font-bold px-6 h-12">
+              Give Feedback
+            </Button>
+          </Link>
+          <Link href="/employee/goals">
+            <Button variant="secondary" className="bg-white text-indigo-600 hover:bg-slate-50 border-0 font-black px-8 h-12 shadow-lg">
+              View Goals
+            </Button>
+          </Link>
         </div>
       </div>
 
-      {/* Main Content Area (2 Columns) */}
-      <div className="flex-1 bg-white p-8">
-        <div className="max-w-6xl mx-auto flex gap-8">
+      <div className="p-10 max-w-[1600px] mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           
-          {/* Left Column (Main Content) */}
-          <div className="flex-1 flex flex-col gap-8">
+          {/* Main Content Column */}
+          <div className="lg:col-span-2 space-y-10">
             
-            {/* Tasks Section (Dummy Data) */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-              <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                  Tasks (3) <span className="text-xs font-normal text-gray-400">Sorted by priority</span>
+            {/* Active Tasks Widget */}
+            <section className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
+                  <ClipboardList className="w-7 h-7 text-indigo-500" />
+                  Your Tasks
                 </h2>
+                <Button variant="ghost" className="text-indigo-600 font-bold hover:bg-indigo-50">
+                  See all <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
               </div>
-              <div className="divide-y divide-gray-100">
-                <div className="px-5 py-4 flex items-center justify-between hover:bg-gray-50 cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-500">✓</div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Complete Self-Evaluation</p>
-                      <p className="text-xs text-gray-500">Q2 Performance Review</p>
-                    </div>
+              
+              <div className="grid gap-4">
+                {pendingReviews.length > 0 ? (
+                  pendingReviews.map(review => (
+                    <Card key={review.id} className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-all overflow-hidden group">
+                      <div className="flex items-center p-6 gap-6">
+                        <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+                          <Star className="w-6 h-6 text-amber-500" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold text-slate-900">
+                            {review.type === 'SELF' ? 'Complete Self-Evaluation' : `Review for Peer`}
+                          </h3>
+                          <p className="text-sm text-slate-500 font-medium">Part of {review.cycle.name}</p>
+                        </div>
+                        <Badge className="bg-amber-50 text-amber-600 border-amber-100 px-4 py-1 font-bold">Priority</Badge>
+                        <Link href={`/employee/reviews/${review.id}`}>
+                          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6">Start</Button>
+                        </Link>
+                      </div>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="bg-white rounded-xl p-10 text-center border-2 border-dashed border-slate-100">
+                    <p className="text-slate-400 font-medium italic">No pending review tasks! All caught up.</p>
                   </div>
-                  <span className="text-gray-400">›</span>
-                </div>
-                <div className="px-5 py-4 flex items-center justify-between hover:bg-gray-50 cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-500">✦</div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Write reviews for team</p>
-                      <p className="text-xs text-gray-500">360° Review (Basic: In-Flight)</p>
-                    </div>
-                  </div>
-                  <span className="text-gray-400">›</span>
-                </div>
-                <div className="px-5 py-4 flex items-center justify-between hover:bg-gray-50 cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-500">★</div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Update your {goals.length} goals</p>
-                      <p className="text-xs text-gray-500">Due end of month</p>
-                    </div>
-                  </div>
-                  <span className="text-gray-400">›</span>
-                </div>
+                )}
+                
+                {/* Always show goal update task as a prompt */}
+                <Card className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-all overflow-hidden group">
+                   <div className="flex items-center p-6 gap-6">
+                     <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
+                       <Target className="w-6 h-6 text-indigo-500" />
+                     </div>
+                     <div className="flex-1">
+                       <h3 className="text-lg font-bold text-slate-900">Update your goals</h3>
+                       <p className="text-sm text-slate-500 font-medium">Check in on your {goals.length} active targets</p>
+                     </div>
+                     <Link href="/employee/goals">
+                       <Button variant="outline" className="border-slate-200 text-slate-600 font-bold px-6">Update</Button>
+                     </Link>
+                   </div>
+                </Card>
               </div>
-              <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/50">
-                <button className="text-xs font-medium text-indigo-600 hover:text-indigo-700">See all tasks</button>
-              </div>
-            </div>
+            </section>
 
-            {/* Active Goals Section */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-              <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="text-base font-bold text-gray-900">
-                  Active goals ({goals.length})
+            {/* Goals Overview Widget */}
+            <section className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
+                  <Target className="w-7 h-7 text-emerald-500" />
+                  Goals Overview
                 </h2>
-                <Link href="/employee/create">
-                  <Button variant="outline" size="sm" className="h-8 text-xs font-medium">Create goal</Button>
+                <Link href="/employee/goals">
+                  <Button variant="ghost" className="text-emerald-600 font-bold hover:bg-emerald-50">
+                    Full List <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
                 </Link>
               </div>
               
-              <div className="p-5 border-b border-gray-100">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="border border-gray-200 rounded-lg p-3 flex flex-col gap-1 shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-3 bg-emerald-400 rounded-full"></div>
-                      <span className="text-xs text-gray-600 font-medium">On track</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <Card className="bg-white border-slate-200 shadow-sm p-6">
+                   <div className="flex flex-col gap-4">
+                     <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Progress to Date</span>
+                        <span className="text-2xl font-black text-emerald-600">68%</span>
+                     </div>
+                     <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden">
+                       <div className="h-full bg-emerald-500 rounded-full shadow-lg shadow-emerald-200" style={{ width: '68%' }} />
+                     </div>
+                     <p className="text-xs font-medium text-slate-500 text-center">
+                       You are <span className="text-emerald-600 font-bold">ahead of schedule</span> for 3 out of 5 goals.
+                     </p>
+                   </div>
+                 </Card>
+                 <Card className="bg-white border-slate-200 shadow-sm p-6 flex items-center justify-between">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Weightage Score</span>
+                      <span className="text-3xl font-black text-slate-900">8.4 / 10</span>
                     </div>
-                    <span className="text-xl font-bold text-gray-900">{approvedCount}</span>
-                  </div>
-                  <div className="border border-gray-200 rounded-lg p-3 flex flex-col gap-1 shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-3 bg-amber-400 rounded-full"></div>
-                      <span className="text-xs text-gray-600 font-medium">Progressing</span>
+                    <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center">
+                      <TrendingUp className="w-6 h-6 text-indigo-600" />
                     </div>
-                    <span className="text-xl font-bold text-gray-900">{draftCount}</span>
-                  </div>
-                  <div className="border border-gray-200 rounded-lg p-3 flex flex-col gap-1 shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-3 bg-rose-400 rounded-full"></div>
-                      <span className="text-xs text-gray-600 font-medium">Off track</span>
-                    </div>
-                    <span className="text-xl font-bold text-gray-900">{reworkCount}</span>
-                  </div>
-                </div>
+                 </Card>
               </div>
-
-              {goals.length === 0 ? (
-                <div className="py-8 text-center text-sm text-gray-500">No active goals found.</div>
-              ) : (
-                <div className="divide-y divide-gray-100">
-                  {goals.map((goal) => (
-                    <div key={goal.id} className="p-4 hover:bg-slate-50 transition-colors flex items-center">
-                      <div className={`w-1 h-8 rounded-full mr-4 ${goal.status === 'APPROVED' ? 'bg-emerald-400' : goal.status === 'REWORK' ? 'bg-rose-400' : 'bg-amber-400'}`} />
-                      
-                      <div className="flex-1">
-                        <Link href={`/employee/check-ins`} className="text-sm font-semibold text-gray-900 hover:underline">
-                          {goal.title}
-                        </Link>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-gray-500">{goal.weightage}% Weightage</span>
-                        </div>
-                      </div>
-                      
-                      <div className="w-24 flex justify-end">
-                        {getStatusBadge(goal.status)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
+            </section>
           </div>
 
-          {/* Right Column (Widgets) */}
-          <div className="w-72 flex flex-col gap-6">
+          {/* Sidebar Column (Widgets) */}
+          <div className="space-y-10">
             
-            {/* Manager & Team Widget */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-900">Manager</h3>
-                <button className="text-[10px] font-medium border border-gray-200 px-2 py-1 rounded text-gray-600 hover:bg-gray-50">View org chart</button>
+            {/* 1:1 Meetings Widget */}
+            <section className="space-y-4">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-indigo-500" />
+                Upcoming 1:1s
+              </h2>
+              <Card className="bg-white border-slate-200 shadow-sm">
+                <CardContent className="p-0">
+                  {oneOnOnes.length > 0 ? (
+                    <div className="divide-y divide-slate-100">
+                      {oneOnOnes.map(meeting => (
+                        <div key={meeting.id} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer">
+                          <div className="flex items-center gap-3">
+                             <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs shadow-inner">SC</div>
+                             <div className="flex flex-col">
+                               <span className="text-sm font-bold text-slate-900">Sarah Chen</span>
+                               <span className="text-[11px] font-medium text-slate-400">{new Date(meeting.date).toLocaleDateString()}</span>
+                             </div>
+                          </div>
+                          <ArrowUpRight className="w-4 h-4 text-slate-300" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-10 text-center text-sm text-slate-400 font-medium">No 1:1s scheduled</div>
+                  )}
+                  <div className="p-4 bg-slate-50/50 border-t border-slate-100">
+                    <Link href="/employee/1-1s">
+                      <Button variant="ghost" className="w-full text-xs font-bold text-indigo-600 hover:bg-indigo-50">Schedule New</Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+
+            {/* Recent Feedback Widget */}
+            <section className="space-y-4">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-purple-500" />
+                Recent Feedback
+              </h2>
+              <div className="space-y-3">
+                 {feedback.map(f => (
+                   <div key={f.id} className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
+                     <p className="text-sm text-slate-600 font-medium line-clamp-2 italic">"{f.content}"</p>
+                     <div className="flex items-center justify-between border-t border-slate-50 pt-3">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Public Feedback</span>
+                        <Link href="/employee/feedback">
+                          <Button variant="ghost" size="sm" className="h-6 text-[10px] font-black text-indigo-500 p-0">View all</Button>
+                        </Link>
+                     </div>
+                   </div>
+                 ))}
               </div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-full bg-slate-200 overflow-hidden">
-                  <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Manager" alt="Manager" />
+            </section>
+
+            {/* PIP Alert (Conditional) */}
+            {pips.length > 0 && (
+              <Card className="bg-rose-50 border-rose-200 shadow-lg shadow-rose-100 overflow-hidden">
+                <div className="p-6 space-y-4 text-center">
+                  <div className="w-12 h-12 rounded-full bg-rose-500 flex items-center justify-center mx-auto text-white shadow-lg">
+                    <Plus className="rotate-45 w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-bold text-rose-900">Active PIP</h3>
+                    <p className="text-xs text-rose-700 font-medium leading-relaxed">
+                      You are currently on a Performance Improvement Plan. Focus on your objectives.
+                    </p>
+                  </div>
+                  <Link href="/employee/pips">
+                    <Button className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold">View Objectives</Button>
+                  </Link>
                 </div>
-                <span className="text-sm font-medium text-gray-700">Sarah Manager</span>
-              </div>
-
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">Team</h3>
-              <div className="flex items-center -space-x-2">
-                <div className="w-8 h-8 rounded-full border-2 border-white bg-indigo-500 text-white flex items-center justify-center text-xs font-bold z-10">ME</div>
-                <div className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 z-20 overflow-hidden"><img src="https://api.dicebear.com/7.x/notionists/svg?seed=T1" /></div>
-                <div className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 z-30 overflow-hidden"><img src="https://api.dicebear.com/7.x/notionists/svg?seed=T2" /></div>
-                <div className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 z-40 overflow-hidden"><img src="https://api.dicebear.com/7.x/notionists/svg?seed=T3" /></div>
-                <div className="w-8 h-8 rounded-full border-2 border-white bg-gray-100 text-gray-500 flex items-center justify-center text-xs font-medium z-50">+4</div>
-              </div>
-            </div>
-
-            {/* 1:1s Widget */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-gray-900">1:1s</h3>
-                <button className="text-[10px] font-medium border border-gray-200 px-2 py-1 rounded text-gray-600 hover:bg-gray-50">Add 1:1</button>
-              </div>
-              <p className="text-xs text-gray-500 leading-relaxed mb-4">
-                Add talking points, collaborate with your team, and store notes to get the most out of recurring meetings.
-              </p>
-              <div className="h-px bg-gray-100 my-4" />
-              <div className="flex items-center justify-between">
-                 <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-slate-200 overflow-hidden"><img src="https://api.dicebear.com/7.x/notionists/svg?seed=Manager" /></div>
-                    <span className="text-xs font-medium text-gray-700">Sarah Manager</span>
-                 </div>
-                 <span className="text-[10px] text-gray-400">Tomorrow</span>
-              </div>
-            </div>
+              </Card>
+            )}
 
           </div>
 

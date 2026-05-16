@@ -25,6 +25,14 @@ model User {
   feedbackGiven       Feedback[]  @relation("FeedbackGiven")
   feedbackReceived    Feedback[]  @relation("FeedbackReceived")
   growthAreas         GrowthArea[] @relation("EmployeeGrowthAreas")
+  
+  // New relations for Performance Suite
+  reviewsReceived     Review[]     @relation("Reviewee")
+  reviewsWritten      Review[]     @relation("Reviewer")
+  talentRatings       TalentRating[] @relation("UserTalentRatings")
+  pips                Pip[]        @relation("UserPIPs")
+  successionFor       SuccessionPlan[] @relation("Successor")
+  
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 }
@@ -129,6 +137,69 @@ model GrowthArea {
   title          String
   description    String?
   status         String   // NOT_STARTED, IN_PROGRESS, ACHIEVED
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// --- NEW PERFORMANCE MODULES ---
+
+model ReviewCycle {
+  id          String   @id @default(cuid())
+  name        String   // e.g. "Annual Review 2024"
+  status      String   // DRAFT, ACTIVE, COMPLETED
+  startDate   DateTime
+  endDate     DateTime
+  reviews     Review[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Review {
+  id            String      @id @default(cuid())
+  cycleId       String
+  cycle         ReviewCycle @relation(fields: [cycleId], references: [id])
+  revieweeId    String
+  reviewee      User        @relation("Reviewee", fields: [revieweeId], references: [id])
+  reviewerId    String
+  reviewer      User        @relation("Reviewer", fields: [reviewerId], references: [id])
+  type          String      // SELF, MANAGER, PEER
+  content       String      // Markdown or JSON answers
+  score         Float?
+  status        String      // PENDING, SUBMITTED
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model TalentRating {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation("UserTalentRatings", fields: [userId], references: [id])
+  performance    Int      // 1-3 (Low, Medium, High)
+  potential      Int      // 1-3 (Low, Medium, High)
+  managerComment String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Pip {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation("UserPIPs", fields: [userId], references: [id])
+  title          String
+  description    String
+  startDate      DateTime
+  endDate        DateTime
+  status         String   // ACTIVE, COMPLETED_SUCCESS, COMPLETED_FAILED
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model SuccessionPlan {
+  id             String   @id @default(cuid())
+  roleTitle      String
+  successorId    String
+  successor      User     @relation("Successor", fields: [successorId], references: [id])
+  readiness      String   // READY_NOW, READY_1_YEAR, READY_2_PLUS_YEARS
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
