@@ -42,11 +42,13 @@ export function ShareButton() {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" onClick={handleShare}>
-          Share Goals
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger
+        render={
+          <Button variant="outline" onClick={handleShare}>
+            Share Goals
+          </Button>
+        }
+      />
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Share link</DialogTitle>

@@ -28,7 +28,7 @@ export default async function TalentPage() {
   }
 
   const reports = await prisma.user.findMany({
-    where: { managerId: session.user.id },
+    where: session.user.role === 'ADMIN' ? { role: 'EMPLOYEE' } : { managerId: session.user.id },
     include: {
       talentRatings: {
         orderBy: { createdAt: 'desc' },
@@ -109,7 +109,7 @@ export default async function TalentPage() {
                      <div className="flex flex-wrap gap-1.5 mt-auto">
                         {users.map(u => (
                           <div key={u.id} className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-[10px] font-bold text-white border-2 border-white shadow-sm ring-1 ring-slate-100" title={u.name}>
-                            {u.name.split(' ').map(n => n[0]).join('')}
+                            {u.name.split(' ').map((n: string) => n[0]).join('')}
                           </div>
                         ))}
                         {users.length === 0 && <span className="text-[10px] text-slate-300 italic font-medium">No results</span>}

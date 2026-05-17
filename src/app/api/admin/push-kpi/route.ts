@@ -26,6 +26,8 @@ export async function POST(req: Request) {
       where: { role: 'EMPLOYEE' }
     })
 
+    const primaryOwnerId = employees[0]?.id || null
+
     // Create a goal for each employee
     const goals = await Promise.all(
       employees.map((emp) => 
@@ -39,6 +41,7 @@ export async function POST(req: Request) {
             weightage: 10, // Default weightage
             status: 'DRAFT',
             isShared: true,
+            primaryOwnerId,
           }
         })
       )

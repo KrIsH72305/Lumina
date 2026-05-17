@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -32,6 +32,10 @@ model User {
   talentRatings       TalentRating[] @relation("UserTalentRatings")
   pips                Pip[]        @relation("UserPIPs")
   successionFor       SuccessionPlan[] @relation("Successor")
+  escalationsAsEmployee EscalationLog[] @relation("EmployeeEscalations")
+  escalationsAsManager  EscalationLog[] @relation("ManagerEscalations")
+  
+  portfolioShares     PortfolioShare[]
   
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
@@ -209,8 +213,40 @@ model NotificationLog {
   type      String   // EMAIL, TEAMS
   recipient String
   subject   String
-  content   String   @db.Text
-  payload   String?  @db.Text // JSON payload for Teams cards
+  content   String
+  payload   String?
   status    String   // SENT, FAILED
   createdAt DateTime @default(now())
 }
+
+model PortfolioShare {
+  id          String   @id @default(cuid())
+  employeeId  String
+  employee    User     @relation(fields: [employeeId], references: [id])
+  token       String   @unique
+  createdAt   DateTime @default(now())
+}
+
+model EscalationRule {
+  id          String   @id @default(cuid())
+  triggerType String   // EMPLOYEE_GOALS_NOT_SUBMITTED, MANAGER_GOALS_NOT_APPROVED, QUARTERLY_CHECKIN_NOT_COMPLETED
+  nDays       Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model EscalationLog {
+  id              String   @id @default(cuid())
+  triggerType     String
+  employeeId      String?
+  employee        User?    @relation("EmployeeEscalations", fields: [employeeId], references: [id])
+  managerId       String?
+  manager         User?    @relation("ManagerEscalations", fields: [managerId], references: [id])
+  details         String
+  escalationLevel Int      // 1 = Employee Notification, 2 = Manager Notification, 3 = Skip-level / HR
+  status          String   // PENDING_ACTION, RESOLVED
+  createdAt       DateTime @default(now())
+  resolvedAt      DateTime?
+}
+

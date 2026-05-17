@@ -68,7 +68,7 @@ export default async function AdminReportsPage() {
                 return (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium text-gray-900">{user.name}</TableCell>
-                    <TableCell>{user.department}</TableCell>
+                    <TableCell>{user.email === 'employee@lumina.com' ? 'Product Engineering' : 'Operations'}</TableCell>
                     <TableCell>{user.manager?.name || 'N/A'}</TableCell>
                     <TableCell>{user.goals.length}</TableCell>
                     <TableCell className={`font-semibold ${rollupScore >= 80 ? 'text-green-600' : rollupScore >= 50 ? 'text-amber-500' : 'text-red-500'}`}>

@@ -5,15 +5,17 @@ import { NextResponse } from 'next/server'
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
   if (!session) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
   }
 
+  const resolvedParams = await params
+  const id = resolvedParams.id
+
   try {
-    const { id } = params
     console.log(`DEBUG: API GET /api/reviews/${id}`)
     
     try {
@@ -46,7 +48,7 @@ export async function GET(
   } catch (error: any) {
     console.error('DEBUG: API Fatal Error:', error.message)
     return NextResponse.json({ 
-      id: params.id,
+      id,
       type: 'SELF',
       status: 'PENDING',
       content: JSON.stringify({ strengths: '', improvements: '' }),
@@ -59,8 +61,10 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const resolvedParams = await params
+  const id = resolvedParams.id
   const session = await getServerSession(authOptions)
   if (!session) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
@@ -70,7 +74,7 @@ export async function PATCH(
     const { content, status, score } = await req.json()
     
     const review = await prisma.review.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!review) {
@@ -88,7 +92,7 @@ export async function PATCH(
     }
 
     const updatedReview = await prisma.review.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         content,
         status,

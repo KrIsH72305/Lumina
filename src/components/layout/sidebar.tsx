@@ -18,7 +18,6 @@ import {
   Activity,
   Clock
 } from 'lucide-react'
-import { ModeToggle } from './mode-toggle'
 
 export function Sidebar() {
   const { data: session } = useSession()
@@ -26,31 +25,42 @@ export function Sidebar() {
 
   if (!session) return null
 
+  const userName = session.user.name || 'User'
   const isManager = session.user.role === 'MANAGER'
   const isAdmin = session.user.role === 'ADMIN'
 
-  const navItems = [
-    { name: 'Home', href: isManager ? '/manager' : '/employee', icon: Home },
-    { name: 'Goals', href: '/employee/goals', icon: Target },
-    { name: 'Updates', href: '/employee/updates', icon: Activity },
-    { name: '1:1s', href: '/employee/1-1s', icon: MessageSquare },
-    { name: 'Feedback', href: '/employee/feedback', icon: MessageSquare },
-    { name: 'My Team', href: '/employee/team', icon: Users },
-    { name: 'Growth', href: '/employee/grow', icon: TrendingUp },
-    { name: 'Reviews', href: '/employee/reviews', icon: Award },
-    { name: 'PIPs', href: '/employee/pips', icon: AlertCircle },
-  ]
-
-  if (isManager) {
-    navItems.push({ name: 'Talent Grid', href: '/employee/talent', icon: Users })
-  }
+  let navItems = []
 
   if (isAdmin) {
-    navItems.push(
+    navItems = [
       { name: 'Admin Panel', href: '/admin', icon: Settings },
       { name: 'Reports', href: '/admin/reports', icon: Activity },
-      { name: 'System Logs', href: '/admin/logs', icon: AlertCircle }
-    )
+      { name: 'System Logs', href: '/admin/logs', icon: AlertCircle },
+      { name: 'PIPs', href: '/employee/pips', icon: AlertCircle },
+      { name: 'Talent Grid', href: '/employee/talent', icon: Users },
+    ]
+  } else if (isManager) {
+    navItems = [
+      { name: 'Home', href: '/manager', icon: Home },
+      { name: 'My Team', href: '/employee/team', icon: Users },
+      { name: 'Talent Grid', href: '/employee/talent', icon: Users },
+      { name: 'PIPs', href: '/employee/pips', icon: AlertCircle },
+      { name: 'Reviews', href: '/employee/reviews', icon: Award },
+      { name: '1:1s', href: '/employee/1-1s', icon: MessageSquare },
+      { name: 'Feedback', href: '/employee/feedback', icon: MessageSquare },
+    ]
+  } else {
+    // Regular employee
+    navItems = [
+      { name: 'Home', href: '/employee', icon: Home },
+      { name: 'Goals', href: '/employee/goals', icon: Target },
+      { name: 'Updates', href: '/employee/updates', icon: Activity },
+      { name: '1:1s', href: '/employee/1-1s', icon: MessageSquare },
+      { name: 'Feedback', href: '/employee/feedback', icon: MessageSquare },
+      { name: 'My Team', href: '/employee/team', icon: Users },
+      { name: 'Reviews', href: '/employee/reviews', icon: Award },
+      { name: 'PIPs', href: '/employee/pips', icon: AlertCircle },
+    ]
   }
 
   return (
@@ -93,16 +103,12 @@ export function Sidebar() {
 
       {/* Footer / User Profile */}
       <div className="p-4 bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800">
-        <div className="flex items-center justify-between mb-4 px-3">
-           <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Appearance</span>
-           <ModeToggle />
-        </div>
         <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-xs font-black shadow-sm border-2 border-white dark:border-slate-800">
-             {session.user.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
+             {userName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
           </div>
           <div className="flex flex-col overflow-hidden">
-            <span className="text-xs font-black text-slate-900 dark:text-slate-100 truncate">{session.user.name}</span>
+            <span className="text-xs font-black text-slate-900 dark:text-slate-100 truncate">{userName}</span>
             <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest truncate">{session.user.role}</span>
           </div>
         </div>

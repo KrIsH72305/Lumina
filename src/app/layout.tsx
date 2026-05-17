@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased h-screen overflow-hidden flex bg-slate-50 relative`}>
         {/* Pastel background decoration */}
         <div className="absolute top-0 inset-x-0 h-[600px] bg-gradient-to-b from-pink-50/80 via-orange-50/40 to-transparent pointer-events-none -z-10" />
@@ -30,6 +30,7 @@ export default function RootLayout({
             <Sidebar />
             <main className="flex-1 overflow-y-auto z-0">{children}</main>
           </div>
+          <Toaster />
         </Providers>
       </body>
     </html>

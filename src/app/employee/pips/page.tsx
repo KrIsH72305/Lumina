@@ -13,12 +13,14 @@ export default async function PIPsPage() {
   if (!session) return null
 
   const pips = await prisma.pip.findMany({
-    where: {
-      OR: [
-        { userId: session.user.id },
-        { user: { managerId: session.user.id } }
-      ]
-    },
+    where: session.user.role === 'ADMIN'
+      ? {}
+      : {
+          OR: [
+            { userId: session.user.id },
+            { user: { managerId: session.user.id } }
+          ]
+        },
     include: {
       user: {
         select: { name: true, email: true, managerId: true }
@@ -28,7 +30,7 @@ export default async function PIPsPage() {
   })
 
   const reports = await prisma.user.findMany({
-    where: { managerId: session.user.id },
+    where: session.user.role === 'ADMIN' ? { role: 'EMPLOYEE' } : { managerId: session.user.id },
     select: { id: true, name: true }
   })
 

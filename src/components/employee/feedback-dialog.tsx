@@ -81,7 +81,7 @@ export function FeedbackDialog({ users }: { users: { id: string, name: string }[
         <form onSubmit={onSubmit} className="space-y-4 pt-4">
           <div className="space-y-2">
             <Label htmlFor="toUserId">Recipient</Label>
-            <Select onValueChange={setToUserId} value={toUserId} required>
+            <Select onValueChange={(val) => setToUserId(val || '')} value={toUserId} required>
               <SelectTrigger>
                 <SelectValue placeholder="Select a teammate" />
               </SelectTrigger>
@@ -94,7 +94,7 @@ export function FeedbackDialog({ users }: { users: { id: string, name: string }[
           </div>
           <div className="space-y-2">
             <Label htmlFor="visibility">Visibility</Label>
-            <Select onValueChange={setVisibility} value={visibility}>
+            <Select onValueChange={(val) => setVisibility(val || 'PUBLIC')} value={visibility}>
               <SelectTrigger>
                 <SelectValue placeholder="Select visibility" />
               </SelectTrigger>

@@ -87,6 +87,8 @@ export default async function EmployeeDashboard() {
     weight: g.weightage
   }));
 
+  const userName = session.user.name || 'Employee'
+
   return (
     <div className="flex flex-col min-h-full bg-slate-50/50">
       {/* Welcome Banner */}
@@ -94,11 +96,11 @@ export default async function EmployeeDashboard() {
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="flex items-center gap-8 relative z-10">
           <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-xl border-2 border-white/30 text-white flex items-center justify-center text-3xl font-black shadow-2xl">
-            {session.user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+            {userName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
           </div>
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <h1 className="text-4xl font-black text-white tracking-tight">Welcome, {session.user.name.split(' ')[0]}</h1>
+              <h1 className="text-4xl font-black text-white tracking-tight">Welcome, {userName.split(' ')[0]}</h1>
               {activeCycle && (
                 <Link href={activeCycle.phase === 'GOAL_SETTING' ? '/employee/goals' : '/employee/check-ins'}>
                   <Badge className="bg-white/20 hover:bg-white/30 text-white border-white/20 backdrop-blur-md px-3 py-1 text-xs font-bold uppercase tracking-wider cursor-pointer transition-all hover:scale-105 active:scale-95 shadow-lg shadow-white/5">

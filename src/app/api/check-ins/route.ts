@@ -97,6 +97,43 @@ export async function POST(req: Request) {
       }
     })
 
+    // Sync achievement updates by the primary owner across all linked goal sheets
+    if (goal.isShared && goal.primaryOwnerId && goal.employeeId === goal.primaryOwnerId) {
+      const linkedGoals = await prisma.goal.findMany({
+        where: {
+          primaryOwnerId: goal.primaryOwnerId,
+          title: goal.title,
+          isShared: true,
+          NOT: { id: goal.id }
+        }
+      })
+
+      await Promise.all(
+        linkedGoals.map((lg) =>
+          prisma.checkIn.upsert({
+            where: {
+              goalId_quarter: {
+                goalId: lg.id,
+                quarter,
+              }
+            },
+            update: {
+              actualAchievement,
+              progressScore,
+              goalStatus,
+            },
+            create: {
+              goalId: lg.id,
+              quarter,
+              actualAchievement,
+              progressScore,
+              goalStatus,
+            }
+          })
+        )
+      )
+    }
+
     return new Response(JSON.stringify(checkIn), { status: 200 })
   } catch (error) {
     if (error instanceof z.ZodError) {

@@ -134,7 +134,7 @@ export function CheckInList({ goals, currentQuarter }: { goals: GoalWithCheckIns
                     </div>
                     <div>
                       <label className="text-sm font-medium mb-1 block">Goal Status</label>
-                      <Select value={goalStatus} onValueChange={setGoalStatus}>
+                      <Select value={goalStatus} onValueChange={(val) => setGoalStatus(val || 'ON_TRACK')}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>

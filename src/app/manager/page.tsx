@@ -24,7 +24,7 @@ export default async function ManagerDashboard() {
 
   // Get direct reports
   const team = await prisma.user.findMany({
-    where: { managerId: session.user.id },
+    where: session.user.role === 'ADMIN' ? { role: 'EMPLOYEE' } : { managerId: session.user.id },
     include: {
       goals: true,
     },

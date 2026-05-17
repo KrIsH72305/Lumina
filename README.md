@@ -83,6 +83,7 @@ The application strictly enforces performance cycles as per enterprise policy:
 | :--- | :--- | :--- |
 | **Employee** | `employee@lumina.com` | `Demo@1234` |
 | **Manager** | `manager@lumina.com` | `Demo@1234` |
+| **Admin** | `admin@lumina.com` | `Demo@1234` |
 
 ---
 

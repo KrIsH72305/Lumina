@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { AdminPushKpi } from '@/components/admin/push-kpi'
+import { EscalationManager } from '@/components/admin/escalation-manager'
 
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions)
@@ -22,7 +23,7 @@ export default async function AdminDashboard() {
   const reworkCount = await prisma.goal.count({ where: { status: 'REWORK' } })
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Admin Console</h1>
@@ -30,7 +31,30 @@ export default async function AdminDashboard() {
         </div>
       </div>
 
-      <AdminPushKpi />
+      <div className="grid gap-6 md:grid-cols-2">
+        <AdminPushKpi />
+        <Card className="shadow-sm">
+          <CardHeader>
+            <CardTitle>Goal Status Breakdown</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b pb-2">
+                <span className="text-sm font-medium text-gray-600">Draft</span>
+                <span className="font-semibold">{draftCount}</span>
+              </div>
+              <div className="flex items-center justify-between border-b pb-2">
+                <span className="text-sm font-medium text-gray-600">Approved</span>
+                <span className="font-semibold text-green-600">{approvedCount}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-600">Rework Needed</span>
+                <span className="font-semibold text-red-600">{reworkCount}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid gap-6 md:grid-cols-3">
         <Card className="shadow-sm">
@@ -59,29 +83,9 @@ export default async function AdminDashboard() {
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle>Goal Status Breakdown</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b pb-2">
-                <span className="text-sm font-medium text-gray-600">Draft</span>
-                <span className="font-semibold">{draftCount}</span>
-              </div>
-              <div className="flex items-center justify-between border-b pb-2">
-                <span className="text-sm font-medium text-gray-600">Approved</span>
-                <span className="font-semibold text-green-600">{approvedCount}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-600">Rework Needed</span>
-                <span className="font-semibold text-red-600">{reworkCount}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <hr className="border-slate-200" />
+
+      <EscalationManager />
     </div>
   )
 }

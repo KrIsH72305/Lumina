@@ -20,7 +20,7 @@ export default async function ManagerCheckInsPage() {
   }
 
   const team = await prisma.user.findMany({
-    where: { managerId: session.user.id },
+    where: session.user.role === 'ADMIN' ? { role: 'EMPLOYEE' } : { managerId: session.user.id },
     include: {
       goals: {
         where: { status: 'APPROVED' },
@@ -46,7 +46,7 @@ export default async function ManagerCheckInsPage() {
           member.goals.forEach(goal => {
             const checkIn = goal.checkIns.find(c => c.quarter === currentQuarter)
             if (checkIn) {
-              rollupScore += (checkIn.progressScore * goal.weightage) / 100
+              rollupScore += ((checkIn.progressScore || 0) * goal.weightage) / 100
             }
           })
 

@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     }
 
     // Check if an active link already exists
-    const existingLink = await prisma.sharedGoalLink.findFirst({
+    const existingLink = await prisma.portfolioShare.findFirst({
       where: { employeeId: session.user.id },
       orderBy: { createdAt: 'desc' }
     })
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     // Create a new link
     const token = randomBytes(16).toString('hex')
     
-    const newLink = await prisma.sharedGoalLink.create({
+    const newLink = await prisma.portfolioShare.create({
       data: {
         employeeId: session.user.id,
         token: token,

@@ -4,7 +4,7 @@ async function main() {
   try {
     const count = await prisma.notificationLog.count()
     console.log(`Table exists! Current logs: ${count}`)
-  } catch (e) {
+  } catch (e: any) {
     console.log(`Table does not exist or error: ${e.message}`)
   }
 }

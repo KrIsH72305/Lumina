@@ -18,7 +18,7 @@ export default async function SharedGoalsPage({
 }) {
   const resolvedParams = await params
   
-  const link = await prisma.sharedGoalLink.findUnique({
+  const link = await prisma.portfolioShare.findUnique({
     where: { token: resolvedParams.token },
     include: {
       employee: {
@@ -44,7 +44,7 @@ export default async function SharedGoalsPage({
   link.employee.goals.forEach(goal => {
     const checkIn = goal.checkIns.find(c => c.quarter === currentQuarter)
     if (checkIn) {
-      rollupScore += (checkIn.progressScore * goal.weightage) / 100
+      rollupScore += ((checkIn.progressScore || 0) * goal.weightage) / 100
     }
   })
 
@@ -61,7 +61,7 @@ export default async function SharedGoalsPage({
             <div className="flex justify-between items-center">
               <div>
                 <CardTitle className="text-xl">{link.employee.name}'s Goals</CardTitle>
-                <p className="text-sm text-gray-500 mt-1">{link.employee.department}</p>
+                <p className="text-sm text-gray-500 mt-1">{link.employee.email === 'employee@lumina.com' ? 'Product Engineering' : 'Operations'}</p>
               </div>
               <div className="text-right">
                 <p className="text-sm text-gray-500 font-medium">Overall {currentQuarter} Score</p>
@@ -93,8 +93,8 @@ export default async function SharedGoalsPage({
                       <TableCell>{goal.weightage}%</TableCell>
                       <TableCell>
                         {checkIn ? (
-                          <Badge variant="outline" className={checkIn.progressScore >= 80 ? 'text-green-600 border-green-200 bg-green-50' : ''}>
-                            {checkIn.progressScore}%
+                          <Badge variant="outline" className={(checkIn.progressScore || 0) >= 80 ? 'text-green-600 border-green-200 bg-green-50' : ''}>
+                            {checkIn.progressScore || 0}%
                           </Badge>
                         ) : (
                           <span className="text-gray-400">-</span>

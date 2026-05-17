@@ -40,10 +40,12 @@ export async function GET(req: Request) {
       csv += row + '\n'
     })
 
+    const nameSlug = (session.user.name || 'user').replace(/\s+/g, '_').toLowerCase()
+
     return new Response(csv, {
       headers: {
         'Content-Type': 'text/csv',
-        'Content-Disposition': `attachment; filename=achievement_report_${session.user.name.replace(/\s+/g, '_').toLowerCase()}.csv`,
+        'Content-Disposition': `attachment; filename=achievement_report_${nameSlug}.csv`,
       },
     })
   } catch (error) {

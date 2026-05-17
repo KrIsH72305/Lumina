@@ -74,6 +74,54 @@ export async function PATCH(req: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
+    const { searchParams } = new URL(req.url)
+    const goalId = searchParams.get('id')
+
+    if (goalId) {
+      const json = await req.json()
+      const body = goalSchema.parse(json)
+
+      const goal = await prisma.goal.findUnique({
+        where: { id: goalId, employeeId: session.user.id }
+      })
+
+      if (!goal) {
+        return new Response(JSON.stringify({ message: 'Goal not found' }), { status: 404 })
+      }
+
+      if (goal.status === 'APPROVED' || goal.status === 'PENDING_APPROVAL') {
+        return new Response(JSON.stringify({ message: 'Approved or pending goals cannot be edited.' }), { status: 403 })
+      }
+
+      const otherGoals = await prisma.goal.findMany({
+        where: { employeeId: session.user.id, NOT: { id: goalId } }
+      })
+      const otherWeightage = otherGoals.reduce((sum, g) => sum + g.weightage, 0)
+
+      if (otherWeightage + body.weightage > 100) {
+        return new Response(JSON.stringify({ message: 'Total weightage cannot exceed 100%' }), { status: 400 })
+      }
+
+      const updatedData: any = {
+        description: body.description,
+        weightage: body.weightage,
+      }
+
+      if (!goal.isShared) {
+        updatedData.title = body.title
+        updatedData.thrustArea = body.thrustArea
+        updatedData.uomType = body.uomType
+        updatedData.target = body.target
+      }
+
+      const updatedGoal = await prisma.goal.update({
+        where: { id: goalId },
+        data: updatedData
+      })
+
+      return new Response(JSON.stringify(updatedGoal), { status: 200 })
+    }
+
     const goals = await prisma.goal.findMany({
       where: { employeeId: session.user.id },
     })
@@ -122,6 +170,41 @@ export async function PATCH(req: Request) {
     return new Response(JSON.stringify({ message: 'Goal sheet submitted for approval' }), { status: 200 })
   } catch (error) {
     return new Response(JSON.stringify({ message: 'Internal Server Error' }), { status: 500 })
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session || session.user.role !== 'EMPLOYEE') {
+      return new Response('Unauthorized', { status: 401 })
+    }
+
+    const { searchParams } = new URL(req.url)
+    const goalId = searchParams.get('id')
+
+    if (goalId === 'drafts') {
+      await prisma.goal.deleteMany({
+        where: {
+          employeeId: session.user.id,
+          status: { in: ['DRAFT', 'REWORK'] },
+        }
+      })
+      return new Response(JSON.stringify({ message: 'Draft goals reset successfully' }), { status: 200 })
+    }
+
+    if (goalId) {
+       const goal = await prisma.goal.findUnique({ where: { id: goalId } })
+       if (!goal || goal.employeeId !== session.user.id) return new Response('Not found', { status: 404 })
+       if (goal.status === 'APPROVED' || goal.status === 'PENDING_APPROVAL') return new Response('Cannot delete approved or pending goals', { status: 403 })
+       
+       await prisma.goal.delete({ where: { id: goalId } })
+       return new Response(JSON.stringify({ message: 'Goal deleted successfully' }), { status: 200 })
+    }
+
+    return new Response('Bad Request', { status: 400 })
+  } catch (error) {
+    return new Response('Internal Server Error', { status: 500 })
   }
 }
 

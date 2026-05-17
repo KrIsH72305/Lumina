@@ -50,7 +50,7 @@ export function GoalForm({ currentWeightage, initialData }: { currentWeightage: 
   const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<z.infer<typeof goalSchema>>({
-    resolver: zodResolver(goalSchema),
+    resolver: zodResolver(goalSchema) as any,
     defaultValues: initialData ? {
       title: initialData.title,
       description: initialData.description || '',
@@ -271,7 +271,30 @@ export function GoalForm({ currentWeightage, initialData }: { currentWeightage: 
                   </span>
                 </div>
                 {remainingWeightage < 0 && (
-                  <p className="text-xs text-red-600 mt-1">Exceeds 100% total.</p>
+                  <div className="mt-4 space-y-3">
+                    <p className="text-xs text-red-600 font-medium">Exceeds 100% total. You must reduce this goal's weightage or reset existing draft goals.</p>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full border-red-200 text-red-600 hover:bg-red-50"
+                      onClick={async () => {
+                        if (confirm('Are you sure you want to delete ALL your unapproved draft goals to free up weightage?')) {
+                          try {
+                            const res = await fetch('/api/goals?id=drafts', { method: 'DELETE' })
+                            if (!res.ok) throw new Error('Failed to reset drafts')
+                            toast.success('Draft goals reset successfully')
+                            router.push('/employee/goals')
+                            router.refresh()
+                          } catch (e: any) {
+                            toast.error(e.message)
+                          }
+                        }
+                      }}
+                    >
+                      Clear All Draft Goals
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>

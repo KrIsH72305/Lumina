@@ -87,7 +87,7 @@ export function PipDialog({ users }: { users: { id: string, name: string }[] }) 
           <form onSubmit={onSubmit} className="space-y-6 pt-8">
             <div className="space-y-2">
               <Label htmlFor="userId" className="text-sm font-bold text-slate-700">Select Employee</Label>
-              <Select onValueChange={setUserId} value={userId} required>
+              <Select onValueChange={(val) => setUserId(val || '')} value={userId} required>
                 <SelectTrigger className="bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-11 focus:ring-rose-500/20">
                   <SelectValue placeholder="Select an employee" />
                 </SelectTrigger>
