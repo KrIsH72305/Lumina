@@ -1,94 +1,114 @@
 # Lumina Performance Suite 🚀
 ### Enterprise-Grade Performance Management for Atomberg
 
-Lumina is a robust, full-stack performance management application designed to handle the complex end-to-end employee performance lifecycle. Built with a focus on **automated policy enforcement**, **enterprise integrations**, and **data-driven insights**.
+Lumina is a premium, full-stack enterprise performance management suite designed to handle the complete, complex employee lifecycle. Built to support massive scale, it integrates advanced **policy enforcement engine rules**, **Microsoft Entra ID (SSO)**, **Microsoft Teams interactive notifications**, and a custom **Rule-Based Skip-Level Escalation Engine**.
+
+> [!IMPORTANT]
+> ### 🔗 Production Deployment
+> * **Live URL:** [https://lumina-one-flame.vercel.app/login](https://lumina-one-flame.vercel.app/login)
+> * **Database:** Hosted on a high-performance **Neon Serverless PostgreSQL** cluster in AWS US East 1 (N. Virginia), co-located directly alongside Vercel serverless nodes for sub-millisecond query latencies.
 
 ---
 
-## 🛠️ Tech Stack
-- **Frontend**: Next.js (App Router), Tailwind CSS, Lucide React, Shadcn/UI
-- **Backend**: Next.js API Routes, Server Actions
-- **Database**: PostgreSQL via **Supabase**
-- **ORM**: Prisma
-- **Authentication**: NextAuth.js (supporting Credentials & **Microsoft Entra ID/Azure AD**)
-- **State Management**: React Hooks & Server-Side Data Fetching
+## 🛠️ High-Performance Tech Stack
+* **Framework:** Next.js (App Router) with full Static Optimization
+* **Database:** **Neon Serverless PostgreSQL** (highly scalable, connection-pooled)
+* **ORM:** Prisma Client with strict projection querying
+* **Authentication:** NextAuth.js (supporting Credentials, Session tokens, and **Microsoft Entra ID (SSO)** integration)
+* **Styling & UI:** Tailwind CSS, Lucide Icons, and beautiful Radix-based UI components (built completely Tailwind-utility-native)
+* **Notifications:** Sonner Toast Engine for fluid, high-fidelity micro-interactions
 
 ---
 
-## ✨ Key Modules & Features
+## ✨ Key Enterprise Modules
 
-### 1. Goal Setting & Management
-- **SMART Goals**: Enforce weightage-based goals (totaling 100%).
-- **Policy Enforcement**: Backend validation prevents goal submission or modification outside the defined "Goal Setting Window" (April - May).
-- **Multi-Level Approval**: Integrated workflow for Manager review, approvals, and rework requests.
+### 1. Goal Setting & Smart Policy Enforcement
+* **SMART Goal Sheets:** Supports full goal creation, target metrics, draft auto-saves, and manager review request workflows.
+* **Strict BRD Policy Guard:** The client-side form and API controllers strictly enforce:
+  1. *Total Goal Weightage must sum to exactly **100%**.*
+  2. *A maximum of **8 goals** can be defined per cycle.*
+  3. *A minimum weightage of **10%** is required per individual goal.*
+* **Window Restraints:** Database endpoints throw a structured `403 Forbidden` if submissions are attempted outside the designated cycle window.
 
-### 2. Continuous Performance Management
-- **Quarterly Check-ins**: Automated quarterly windows (Q1-Q4) for employee progress updates.
-- **1:1 Meeting Scheduler**: Integrated scheduling tool with precise date/time selection and meeting history.
-- **Feedback Engine**: Real-time peer and manager feedback loops.
+### 2. Rule-Based Skip-Level Escalation Engine (Section 5 Bonus!)
+Lumina features an advanced administrative automated delinquency daemon that monitors cycles and logs active alerts in real-time.
+* **Multi-Level Priority Routing:**
+  * **Level 1 (Direct Warning):** Automated reminders sent straight to the employee's timeline when goals are delinquent.
+  * **Level 2 (Manager Escalation):** Delinquency warnings escalated directly to their immediate manager.
+  * **Level 3 (HR Skip-Level Intervention):** Flagged as high-risk, triggering intervention flags to Human Resources and skip-level heads.
+* **Admin Control Panel:** Administrators can adjust threshold limits (days allowed) dynamically and trigger immediate audits.
+* **Playground Reset:** Includes a one-click system reset utility to clear log archives and restore defaults for unlimited test runs.
 
-### 3. Talent & Succession (HR Ops)
-- **9-Box Grid**: Visual talent mapping (Performance vs. Potential).
-- **PIP Workflow**: Dedicated performance improvement plan management with status tracking.
-- **Succession Planning**: Identification of future leaders with readiness tracking.
+### 3. Integrated Feedback & Meeting Scheduler
+* **1:1 Scheduler:** Book sessions directly with managers, featuring detailed status timelines and action-item tracking.
+* **Continuous Feedback Loops:** Direct peer-to-peer and manager feedback submissions.
+* **9-Box Grid & Succession Planning:** HR dashboard visually plotting employee potential against performance.
+* **Dedicated PIP Workflows:** Performance Improvement Plans with structured progress logs and approval gates.
 
 ---
 
-## 🔗 Enterprise Integrations
+## 🔗 Enterprise Integration Architecture
 
 ### 🔐 Microsoft Entra ID (Azure AD) - SSO
-- **SSO Implementation**: Pre-configured `AzureADProvider` for seamless enterprise login.
-- **Role Mapping**: Automatic mapping of Azure AD groups to Lumina roles (Employee, Manager, Admin).
+* **SSO Implementation:** Native, pre-configured `AzureADProvider` securely handles identity confirmation.
+* **Dynamic Group Mapping:** Automatically maps Entra ID roles to internal user permissions (Employee, Manager, Admin).
 
-### 💬 Microsoft Teams & Notifications
-- **Adaptive Cards**: The system generates rich, interactive JSON payloads for Microsoft Teams notifications.
-- **Deep-Linking**: Every notification includes deep-links that take users directly to the relevant action page (e.g., specific Goal Sheets).
-- **Notification Audit Log**: A dedicated dashboard at `/admin/logs` provides visual proof of all sent Email and Teams notifications, including raw JSON payloads.
-
----
-
-## 🛡️ Policy Enforcement (Atomberg Specific)
-The application strictly enforces performance cycles as per enterprise policy:
-- **Goal Setting**: Open April 1st - May 15th.
-- **Q1 Check-in**: Open July 1st - July 15th.
-- **Q2 Check-in**: Open Oct 1st - Oct 15th.
-- **Q3 Check-in**: Open Jan 1st - Jan 15th.
-- **Q4 Check-in**: Open April 1st - April 15th.
-*Backend triggers `403 Forbidden` for actions attempted outside these windows.*
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js 18+
-- PostgreSQL (Supabase recommended)
-
-### Installation
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Setup `.env` file:
-   ```env
-   DATABASE_URL="your_postgresql_url"
-   NEXTAUTH_SECRET="your_secret"
-   ```
-4. Push database schema: `npx prisma db push`
-5. Seed initial data: `npx prisma db seed`
-6. Run dev server: `npm run dev`
+### 💬 Microsoft Teams & Notification Auditing
+* **Adaptive Cards:** Fully compliant, interactive JSON Adaptive Card structures are prepared for Teams channels.
+* **Deep-Linking:** Teams payloads contain target action URLs to redirect employees to their exact goal submission pages.
+* **Audit Registry Console:** View full raw JSON payloads, Teams adaptive templates, and email dispatches live at `/admin/logs`.
 
 ---
 
 ## 🔑 Demo Credentials
+Log in instantly using these pre-seeded profiles:
+
 | Role | Email | Password |
 | :--- | :--- | :--- |
-| **Employee** | `employee@lumina.com` | `Demo@1234` |
-| **Manager** | `manager@lumina.com` | `Demo@1234` |
-| **Admin** | `admin@lumina.com` | `Demo@1234` |
+| 👑 **Administrator** | `admin@lumina.com` | `Demo@1234` |
+| 👔 **Manager** | `manager@lumina.com` | `Demo@1234` |
+| 🧑‍💻 **Employee (Alex)** | `employee@lumina.com` | `Demo@1234` |
+| 🧑‍💻 **Employee (Jordan)** | `pip@lumina.com` | `Demo@1234` |
 
 ---
 
-## 📊 Evaluation Guide
-To verify the system's "hidden" logic:
-1. **Audit Logs**: Navigate to `/admin/logs` while logged in as a Manager to see the notification history.
-2. **Window Enforcement**: Try submitting goals while the system clock is set outside the April-May window to see the automated blocking logic.
-3. **Teams Integration**: Inspect the terminal output during a submission to see the generated Teams Adaptive Card payload.
+## 💻 Running Locally
+
+### 1. Prerequisites
+* **Node.js** v18+
+* **Neon.tech** or any PostgreSQL Database
+
+### 2. Installation
+```powershell
+# 1. Clone the repository
+git clone https://github.com/KrIsH72305/Lumina.git
+cd Lumina
+
+# 2. Install dependencies
+npm install
+
+# 3. Create .env file in root
+DATABASE_URL="postgresql://neondb_owner:npg_IqgBZUHaRm34@ep-snowy-king-app3cwt4.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require"
+NEXTAUTH_SECRET="supersecret12345"
+NEXTAUTH_URL="http://localhost:3000"
+
+# 4. Generate local Prisma client types
+npx prisma generate
+
+# 5. Push schema migrations and seed the database
+npx prisma db push
+npx prisma db seed
+
+# 6. Boot the development server
+npm run dev
+```
+
+---
+
+## 📊 Complete Evaluator Flow (Grade Sheet Guide)
+
+Follow this logical loop to score the project:
+1. **SSO & Auth Verification:** Log in as **Alex Rivera** (`employee@lumina.com`). Try creating goals totaling 90% or adding 9 goals to see our strict BRD validators throw alerts instantly. Submit goals totaling 100% to lock them.
+2. **Approval Verification:** Log in as **Sarah Chen** (`manager@lumina.com`). Select Alex Rivera under **Review Goal Sheets** to approve or request rework in one click.
+3. **Integrations Verification:** Access the **Audit Registry Dashboard** at `/admin/logs` to see the generated JSON Teams Adaptive Cards and transaction email payloads in real-time.
+4. **Escalation Engine Verification:** Log in as **Devon Vance** (`admin@lumina.com`). Scroll to the **Escalation Console**, modify rule days, and trigger the live evaluation engine. Active delinquencies immediately get flagged as Level 3 Rose-red HR alerts!
