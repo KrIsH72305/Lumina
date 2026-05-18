@@ -5,6 +5,7 @@ import { z } from 'zod'
 
 const pushKpiSchema = z.object({
   title: z.string().min(5),
+  description: z.string().optional(),
   thrustArea: z.string(),
   uomType: z.string(),
   target: z.number(),
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
     }
 
     const json = await req.json()
-    const { title, thrustArea, uomType, target } = pushKpiSchema.parse(json)
+    const { title, description, thrustArea, uomType, target } = pushKpiSchema.parse(json)
 
     // Get all employees
     const employees = await prisma.user.findMany({
@@ -35,6 +36,7 @@ export async function POST(req: Request) {
           data: {
             employeeId: emp.id,
             title,
+            description,
             thrustArea,
             uomType,
             target,

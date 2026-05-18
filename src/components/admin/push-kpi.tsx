@@ -4,6 +4,14 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { toast } from 'sonner'
 import { Megaphone, Loader2 } from 'lucide-react'
 
@@ -11,6 +19,7 @@ export function AdminPushKpi() {
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
+    description: '',
     thrustArea: 'Operations',
     uomType: 'NUMERIC_MAX',
     target: 0,
@@ -30,7 +39,7 @@ export function AdminPushKpi() {
       if (!res.ok) throw new Error('Failed to push KPI')
 
       toast.success('Departmental KPI pushed to all employees!')
-      setFormData({ title: '', thrustArea: 'Operations', uomType: 'NUMERIC_MAX', target: 0 })
+      setFormData({ title: '', description: '', thrustArea: 'Operations', uomType: 'NUMERIC_MAX', target: 0 })
     } catch (error: any) {
       toast.error(error.message)
     } finally {
@@ -59,6 +68,39 @@ export function AdminPushKpi() {
                 className="bg-white"
               />
             </div>
+            
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-indigo-700 uppercase">Thrust Area</label>
+              <Select value={formData.thrustArea} onValueChange={v => setFormData({ ...formData, thrustArea: v })}>
+                <SelectTrigger className="bg-white">
+                  <SelectValue placeholder="Select Area" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Operations">Operations</SelectItem>
+                  <SelectItem value="Sales">Sales</SelectItem>
+                  <SelectItem value="HR">HR</SelectItem>
+                  <SelectItem value="Finance">Finance</SelectItem>
+                  <SelectItem value="Technology">Technology</SelectItem>
+                  <SelectItem value="Customer Success">Customer Success</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-indigo-700 uppercase">Measurement Type</label>
+              <Select value={formData.uomType} onValueChange={v => setFormData({ ...formData, uomType: v })}>
+                <SelectTrigger className="bg-white">
+                  <SelectValue placeholder="Select Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NUMERIC_MAX">Maximize (e.g. Revenue, &gt; is better)</SelectItem>
+                  <SelectItem value="NUMERIC_MIN">Minimize (e.g. Cost, &lt; is better)</SelectItem>
+                  <SelectItem value="TIMELINE">Timeline (Date based)</SelectItem>
+                  <SelectItem value="ZERO">Zero (e.g. Safety Incidents)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <label className="text-xs font-bold text-indigo-700 uppercase">Target</label>
               <Input 
@@ -67,6 +109,16 @@ export function AdminPushKpi() {
                 onChange={e => setFormData({ ...formData, target: Number(e.target.value) })}
                 required
                 className="bg-white"
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-xs font-bold text-indigo-700 uppercase">Description (Optional)</label>
+              <Textarea
+                placeholder="Provide more context for this goal..."
+                value={formData.description}
+                onChange={e => setFormData({ ...formData, description: e.target.value })}
+                className="bg-white min-h-[80px]"
               />
             </div>
           </div>
