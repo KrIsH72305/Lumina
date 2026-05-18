@@ -71,7 +71,7 @@ export function AdminPushKpi() {
             
             <div className="space-y-2">
               <label className="text-xs font-bold text-indigo-700 uppercase">Thrust Area</label>
-              <Select value={formData.thrustArea} onValueChange={v => setFormData({ ...formData, thrustArea: v })}>
+              <Select value={formData.thrustArea} onValueChange={v => setFormData({ ...formData, thrustArea: v || '' })}>
                 <SelectTrigger className="bg-white">
                   <SelectValue placeholder="Select Area" />
                 </SelectTrigger>
@@ -88,7 +88,7 @@ export function AdminPushKpi() {
 
             <div className="space-y-2">
               <label className="text-xs font-bold text-indigo-700 uppercase">Measurement Type</label>
-              <Select value={formData.uomType} onValueChange={v => setFormData({ ...formData, uomType: v })}>
+              <Select value={formData.uomType} onValueChange={v => setFormData({ ...formData, uomType: v || '' })}>
                 <SelectTrigger className="bg-white">
                   <SelectValue placeholder="Select Type" />
                 </SelectTrigger>
