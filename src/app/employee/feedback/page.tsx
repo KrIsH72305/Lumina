@@ -57,7 +57,7 @@ export default function FeedbackPage() {
   return (
     <div className="flex flex-col min-h-full pb-20">
       {/* Premium Header Banner */}
-      <div className="bg-gradient-to-r from-rose-600 to-pink-500 -mx-0 px-10 py-16 flex items-center justify-between shadow-xl shadow-rose-100 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 -mx-0 px-10 py-16 flex items-center justify-between shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="flex items-center gap-6 relative z-10">
           <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-xl border-2 border-white/30 text-white flex items-center justify-center shadow-2xl">

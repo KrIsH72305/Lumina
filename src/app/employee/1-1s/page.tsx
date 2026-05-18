@@ -30,7 +30,7 @@ export default async function OneOnOnesPage() {
   return (
     <div className="flex flex-col min-h-full">
       {/* Banner */}
-      <div className="bg-gradient-to-r from-purple-500 to-fuchsia-400 px-8 py-10 flex items-center justify-between shadow-sm">
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-8 py-10 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center shadow-sm">
             <MessageSquare className="w-6 h-6 text-white" />

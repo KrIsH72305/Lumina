@@ -92,7 +92,7 @@ export default async function EmployeeDashboard() {
   return (
     <div className="flex flex-col min-h-full bg-slate-50/50">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 px-10 py-16 flex items-center justify-between shadow-xl shadow-indigo-100 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-10 py-16 flex items-center justify-between shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="flex items-center gap-8 relative z-10">
           <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-xl border-2 border-white/30 text-white flex items-center justify-center text-3xl font-black shadow-2xl">

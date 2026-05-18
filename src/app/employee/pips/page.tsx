@@ -39,7 +39,7 @@ export default async function PIPsPage() {
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-10">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-rose-600 to-rose-400 -mx-8 -mt-8 px-10 py-12 flex items-center justify-between shadow-lg shadow-rose-100 mb-10 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 -mx-8 -mt-8 px-10 py-12 flex items-center justify-between shadow-xl mb-10 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="flex flex-col gap-2 relative z-10">
           <h1 className="text-4xl font-black text-white tracking-tight">Performance Improvement</h1>
